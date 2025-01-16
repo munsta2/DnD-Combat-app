@@ -180,7 +180,7 @@
           <label for="monster-actions">Actions</label>
           <textarea
             id="monster-actions"
-            v-model="newMonster.actions"
+            v-html="newMonster.actions"
             placeholder="Describe the monster's actions"
           ></textarea>
         </div>
@@ -271,13 +271,13 @@
             <hr />
             <div class="abilities">
               <h3>Actions</h3>
-              <p>{{ selectedMonster.actions }}</p>
+              <div v-html="selectedMonster.actions"></div>
               <h3>Legendary Actions</h3>
-              <p>{{ selectedMonster.legendaryActions }}</p>
+              <div v-html="selectedMonster.legendaryActions"></div>
               <h3>Traits</h3>
-              <p>{{ selectedMonster.traits }}</p>
+              <div v-html="selectedMonster.traits"></div>
               <h3>Reactions</h3>
-              <p>{{ selectedMonster.reactions }}</p>
+              <div v-html="selectedMonster.reactions"></div>
             </div>
           </div>
         </div>

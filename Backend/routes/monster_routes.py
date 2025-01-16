@@ -16,7 +16,7 @@ def manage_monsters():
                 hp=data.get("hp", 0),
                 ac=data.get("ac", 0),
                 speed=data.get("speed", ""),
-                str=data.get("stats", {}).get("str", 0),  # Map stats fields
+                str=data.get("stats", {}).get("str", 0),
                 dex=data.get("stats", {}).get("dex", 0),
                 con=data.get("stats", {}).get("con", 0),
                 int=data.get("stats", {}).get("int", 0),
@@ -36,8 +36,21 @@ def manage_monsters():
 
             return jsonify(new_monster.to_dict()), 201
         except Exception as e:
-            print("Error:", e)  # Log the error
+            print(f"Error adding monster: {e}")
+            return jsonify({"error": str(e)}), 400
+
+    elif request.method == "GET":
+        try:
+            monsters = Monster.query.all()
+            return jsonify([monster.to_dict() for monster in monsters])
+        except Exception as e:
+            print(f"Error fetching monsters: {e}")
             return jsonify({"error": str(e)}), 500
+def get_monsters():
+    monsters = Monster.query.all()
+    return jsonify([{"id": m.id, "name": m.name} for m in monsters])
+
+
 
 @monster_bp.route("/api/monsters/<int:monster_id>", methods=["PUT", "DELETE"])
 def modify_monster(monster_id):

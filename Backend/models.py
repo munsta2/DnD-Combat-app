@@ -1,20 +1,25 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 db = SQLAlchemy()
 
 # Player model
 class Player(db.Model):
+    __tablename__ = 'player'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     level = db.Column(db.Integer, nullable=False)
     ac = db.Column(db.Integer, nullable=False)
     initiative_modifier = db.Column(db.Integer, nullable=False)
+    player_encounters = db.relationship('EncounterPlayer', back_populates='player')
+   
 
 # Party model
 class Party(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     players = db.relationship('Player', secondary='party_player', backref='parties', lazy='joined')
+    
 
 # Association table for many-to-many relationship
 party_player = db.Table('party_player',
@@ -22,8 +27,47 @@ party_player = db.Table('party_player',
     db.Column('player_id', db.Integer, db.ForeignKey('player.id'), primary_key=True)
 )
 
+
+
+
 # Monster model
+
+
+
+class EncounterMonster(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    encounter_id = db.Column(db.Integer, db.ForeignKey('encounter.id'))
+    monster_id = db.Column(db.Integer, db.ForeignKey('monster.id'))
+    alias = db.Column(db.String(100))  # Alias for the monster
+    count = db.Column(db.Integer, default=1)  # Number of this monster
+    # Relationships
+    encounter = db.relationship('Encounter', back_populates='encounter_monsters')
+    monster = db.relationship('Monster', back_populates='monster_encounters')
+
+class Encounter(db.Model):
+    __tablename__ = 'encounter'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    encounter_monsters = db.relationship('EncounterMonster', back_populates='encounter', cascade='all, delete-orphan')
+    encounter_players = db.relationship('EncounterPlayer', back_populates='encounter', cascade="all, delete-orphan")
+
+class EncounterPlayer(db.Model):
+    __tablename__ = 'encounter_player'
+
+    id = db.Column(db.Integer, primary_key=True)
+    encounter_id = db.Column(db.Integer, db.ForeignKey('encounter.id'))
+    player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
+    alias = db.Column(db.String(100))
+    count = db.Column(db.Integer, default=1)
+
+    # Relationships
+    encounter = db.relationship('Encounter', back_populates='encounter_players')
+    player = db.relationship('Player', back_populates='player_encounters')
+
+
+
 class Monster(db.Model):
+    __tablename__ = 'monster'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     size = db.Column(db.String(50))
@@ -74,3 +118,4 @@ class Monster(db.Model):
         'traits': self.traits,
         'reactions': self.reactions
     }
+    monster_encounters = db.relationship('EncounterMonster', back_populates='monster')

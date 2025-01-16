@@ -9,6 +9,7 @@
       <button @click="$router.push('/players')">Manage Players</button>
       <button @click="$router.push('/parties')">Manage Parties</button>
       <button @click="$router.push('/monsters')">Manage Monsters</button>
+      <button @click="$router.push('/encounters')">Manage Encounter</button>
     </div>
   </div>
 </template>

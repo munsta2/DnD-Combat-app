@@ -33,6 +33,9 @@ def manage_players():
             "initiativeModifier": player.initiative_modifier
         } for player in players
     ])
+def get_parties():
+    parties = Party.query.all()
+    return jsonify([{"id": p.id, "name": p.name} for p in parties])
 
 @player_bp.route("/api/players/<int:player_id>", methods=["PUT", "DELETE"])
 def modify_player(player_id):
@@ -59,3 +62,5 @@ def modify_player(player_id):
         db.session.delete(player)
         db.session.commit()
         return jsonify({"message": "Player deleted"})
+
+
