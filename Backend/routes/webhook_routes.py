@@ -6,7 +6,6 @@ webhook_bp = Blueprint('webhook', __name__)
 
 @webhook_bp.route('/webhook', methods=['POST'])
 def git_update():
-    try:
         # Dynamically resolve the repository path
         REPO_PATH = os.path.join(os.path.dirname(__file__), '../../')
         repo = Repo(REPO_PATH)
@@ -16,8 +15,6 @@ def git_update():
         origin.pull()
 
         return 'Pull successful', 200
-    except Exception as e:
-        return f'Error: {e}', 500
 
 @webhook_bp.route('/webhook', methods=['GET'])
 def get_repo():
