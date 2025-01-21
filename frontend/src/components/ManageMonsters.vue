@@ -170,17 +170,24 @@
           <label for="monster-cr">Challenge Rating (CR)</label>
           <input
             id="monster-cr"
-            v-model.number="newMonster.challengeRating"
+            v-model="newMonster.cr"
+            placeholder="e.g., 1/4, 1, 2"
+          />
+        </div>
+        <div class="form-row">
+          <label for="monster-xp">XP</label>
+          <input
+            id="monster-xp"
+            v-model="newMonster.exp"
             type="number"
-            step="0.25"
-            placeholder="Enter CR (e.g., 1, 0.5)"
+            placeholder="Enter XP value (e.g., 50)"
           />
         </div>
         <div class="form-row">
           <label for="monster-actions">Actions</label>
           <textarea
             id="monster-actions"
-            v-html="newMonster.actions"
+            v-model="newMonster.actions"
             placeholder="Describe the monster's actions"
           ></textarea>
         </div>
@@ -229,53 +236,67 @@
           </li>
         </ul>
         <div v-if="selectedMonster" class="monster-details">
-          <div class="action-buttons">
-            <button @click="startEdit(selectedMonster)">Edit</button>
-            <button @click="deleteMonster(selectedMonster.id)">Delete</button>
-          </div>
           <div class="statblock">
+            <!-- Monster Name -->
             <h2>{{ selectedMonster.name }}</h2>
             <p class="subtitle">
               {{ selectedMonster.size }} {{ selectedMonster.type }},
               {{ selectedMonster.alignment }}
             </p>
-            <hr />
+
+            <!-- Armor Class, Hit Points, Speed -->
             <div class="statblock-header">
               <p><strong>Armor Class:</strong> {{ selectedMonster.ac }}</p>
               <p><strong>Hit Points:</strong> {{ selectedMonster.hp }}</p>
               <p><strong>Speed:</strong> {{ selectedMonster.speed }}</p>
             </div>
-            <hr />
+
+            <!-- Stats -->
             <div class="stats">
-              <p><strong>STR</strong> {{ selectedMonster.stats.str }}</p>
-              <p><strong>DEX</strong> {{ selectedMonster.stats.dex }}</p>
-              <p><strong>CON</strong> {{ selectedMonster.stats.con }}</p>
-              <p><strong>INT</strong> {{ selectedMonster.stats.int }}</p>
-              <p><strong>WIS</strong> {{ selectedMonster.stats.wis }}</p>
-              <p><strong>CHA</strong> {{ selectedMonster.stats.cha }}</p>
+              <p><strong>STR:</strong> {{ selectedMonster.stats.str }}</p>
+              <p><strong>DEX:</strong> {{ selectedMonster.stats.dex }}</p>
+              <p><strong>CON:</strong> {{ selectedMonster.stats.con }}</p>
+              <p><strong>INT:</strong> {{ selectedMonster.stats.int }}</p>
+              <p><strong>WIS:</strong> {{ selectedMonster.stats.wis }}</p>
+              <p><strong>CHA:</strong> {{ selectedMonster.stats.cha }}</p>
             </div>
-            <hr />
+
+            <!-- Details -->
             <div class="details">
-              <p><strong>Skills:</strong> {{ selectedMonster.skills }}</p>
               <p>
                 <strong>Damage Vulnerabilities:</strong>
-                {{ selectedMonster.damageVulnerabilities }}
+                {{ selectedMonster.damageVulnerabilities || "None" }}
               </p>
               <p><strong>Senses:</strong> {{ selectedMonster.senses }}</p>
               <p><strong>Languages:</strong> {{ selectedMonster.languages }}</p>
               <p>
-                <strong>Challenge:</strong>
-                {{ selectedMonster.challengeRating }}
+                <strong>Challenge:</strong> {{ selectedMonster.cr }} ({{
+                  selectedMonster.exp
+                }}
+                XP)
               </p>
             </div>
-            <hr />
+
+            <!-- Actions -->
             <div class="abilities">
               <h3>Actions</h3>
               <div v-html="selectedMonster.actions"></div>
+            </div>
+
+            <!-- Legendary Actions -->
+            <div class="abilities" v-if="selectedMonster.legendaryActions">
               <h3>Legendary Actions</h3>
               <div v-html="selectedMonster.legendaryActions"></div>
+            </div>
+
+            <!-- Traits -->
+            <div class="abilities" v-if="selectedMonster.traits">
               <h3>Traits</h3>
               <div v-html="selectedMonster.traits"></div>
+            </div>
+
+            <!-- Reactions -->
+            <div class="abilities" v-if="selectedMonster.reactions">
               <h3>Reactions</h3>
               <div v-html="selectedMonster.reactions"></div>
             </div>
@@ -310,7 +331,8 @@ export default {
       languages: "",
       damageVulnerabilities: "",
       senses: "",
-      challengeRating: 0,
+      cr: "",
+      exp: 0,
     });
     const searchTerm = ref("");
     const selectedMonster = ref(null);
@@ -318,6 +340,7 @@ export default {
     const goHome = () => {
       router.push("/");
     };
+
     const filteredMonsters = computed(() => {
       return monsters.value.filter((monster) =>
         monster.name.toLowerCase().includes(searchTerm.value.toLowerCase())
@@ -325,16 +348,21 @@ export default {
     });
 
     const fetchMonsters = async () => {
-      const response = await fetch("http://localhost:5000/api/monsters");
+      const response = await fetch(
+        `${process.env.VUE_APP_API_URL}/api/monsters`
+      );
       monsters.value = await response.json();
     };
 
     const createMonster = async () => {
-      const response = await fetch("http://localhost:5000/api/monsters", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newMonster.value),
-      });
+      const response = await fetch(
+        `${process.env.VUE_APP_API_URL}/api/monsters`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newMonster.value),
+        }
+      );
       const createdMonster = await response.json();
       monsters.value.push(createdMonster);
       newMonster.value = {
@@ -353,12 +381,13 @@ export default {
         languages: "",
         damageVulnerabilities: "",
         senses: "",
-        challengeRating: 0,
+        cr: "",
+        exp: 0,
       };
     };
 
     const deleteMonster = async (monsterId) => {
-      await fetch(`http://localhost:5000/api/monsters/${monsterId}`, {
+      await fetch(`${process.env.VUE_APP_API_URL}/api/monsters/${monsterId}`, {
         method: "DELETE",
       });
       monsters.value = monsters.value.filter((m) => m.id !== monsterId);
@@ -370,7 +399,6 @@ export default {
     };
 
     const startEdit = (monster) => {
-      // Placeholder for edit functionality
       alert(`Edit functionality is not implemented yet for ${monster.name}`);
     };
 
@@ -538,6 +566,7 @@ export default {
   margin: 20px auto;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   color: #333;
+  position: relative;
 }
 
 .statblock h2 {
@@ -545,19 +574,30 @@ export default {
   margin: 0;
   text-align: center;
   color: #8b4513;
+  border-bottom: 2px solid #8b0000; /* Redline under the title */
+  padding-bottom: 10px;
 }
 
 .statblock .subtitle {
   text-align: center;
   font-style: italic;
   color: #555;
+  margin-bottom: 10px;
+}
+
+.statblock-header,
+.stats,
+.details,
+.abilities {
+  padding: 10px 0;
+  border-top: 2px solid #8b0000; /* Redline between sections */
+  margin-top: 10px;
 }
 
 .statblock-header {
   display: flex;
   justify-content: space-between;
   font-size: 1em;
-  margin-bottom: 10px;
 }
 
 .stats {
@@ -586,8 +626,23 @@ export default {
 
 hr {
   border: none;
-  border-top: 1px solid #8b4513;
+  border-top: 2px solid #8b0000; /* Redline for horizontal rules */
   margin: 10px 0;
+}
+
+button {
+  margin: 5px;
+  padding: 10px 20px;
+  font-size: 1em;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
 }
 
 button {

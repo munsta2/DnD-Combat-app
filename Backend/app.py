@@ -7,8 +7,13 @@ from routes.party_routes import party_bp
 from routes.monster_routes import monster_bp
 from flask_migrate import Migrate
 from routes.encounter_routes import encounter_bp
+
 app = Flask(__name__)
 CORS(app)
+
+# Optional: Limit CORS to your Netlify domain for security
+CORS(app, resources={r"/*": {"origins": "https://dnd-combat-management.netlify.app"}})
+
 
 # Configure the SQLite database
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///dnd_manager.db"

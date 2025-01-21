@@ -85,37 +85,39 @@ class Monster(db.Model):
     languages = db.Column(db.String(200))
     damage_vulnerabilities = db.Column(db.String(200))
     senses = db.Column(db.String(200))
-    challenge_rating = db.Column(db.Float)
+    cr = db.Column(db.String(10), nullable=True)  # Challenge Rating (e.g., "1/4")
+    exp = db.Column(db.Integer, nullable=True)  # Experience Points (e.g., 50)
     actions = db.Column(db.Text)
     legendary_actions = db.Column(db.Text)
     traits = db.Column(db.Text)
     reactions = db.Column(db.Text)
 
     def to_dict(self):
-     return {
-        'id': self.id,
-        'name': self.name,
-        'size': self.size,
-        'type': self.type,
-        'alignment': self.alignment,
-        'hp': self.hp,
-        'ac': self.ac,
-        'speed': self.speed,
-        'stats': {  # Construct the stats dictionary from individual fields
-            'str': self.str,
-            'dex': self.dex,
-            'con': self.con,
-            'int': self.int,
-            'wis': self.wis,
-            'cha': self.cha
-        },
-        'languages': self.languages,
-        'damageVulnerabilities': self.damage_vulnerabilities,
-        'senses': self.senses,
-        'challengeRating': self.challenge_rating,
-        'actions': self.actions,
-        'legendaryActions': self.legendary_actions,
-        'traits': self.traits,
-        'reactions': self.reactions
-    }
+        return {
+            'id': self.id,
+            'name': self.name,
+            'size': self.size,
+            'type': self.type,
+            'alignment': self.alignment,
+            'hp': self.hp,
+            'ac': self.ac,
+            'speed': self.speed,
+            'stats': {
+                'str': self.str,
+                'dex': self.dex,
+                'con': self.con,
+                'int': self.int,
+                'wis': self.wis,
+                'cha': self.cha,
+            },
+            'languages': self.languages,
+            'damageVulnerabilities': self.damage_vulnerabilities,
+            'senses': self.senses,
+            'cr': self.cr,
+            'exp': self.exp,
+            'actions': self.actions,
+            'legendaryActions': self.legendary_actions,
+            'traits': self.traits,
+            'reactions': self.reactions,
+        }
     monster_encounters = db.relationship('EncounterMonster', back_populates='monster')

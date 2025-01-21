@@ -2,6 +2,7 @@ import json
 from models import db, Monster
 from app import app
 
+
 def parse_monster_data(json_monster):
     """
     Map the JSON monster data to the Monster model.
@@ -12,11 +13,26 @@ def parse_monster_data(json_monster):
         except (ValueError, TypeError):
             return default
 
-    def parse_float(value, default=0.0):
-        try:
-            return float(value.split()[0]) if isinstance(value, str) else float(value)
-        except (ValueError, TypeError):
-            return default
+    def parse_exp_and_cr(challenge):
+        """
+        Parse the Challenge field to extract CR and EXP.
+        Format: "1/4 (50 XP)"
+        """
+        if not challenge:
+            return None, None
+        
+        parts = challenge.split("(")
+        cr = parts[0].strip() if len(parts) > 0 else None
+        exp = None
+        if len(parts) > 1:
+            try:
+                exp = int(parts[1].strip(") XP").replace(",", ""))
+            except ValueError:
+                exp = None
+        return cr, exp
+
+    # Extract CR and EXP
+    cr, exp = parse_exp_and_cr(json_monster.get("Challenge", ""))
 
     return Monster(
         name=json_monster.get("name", ""),
@@ -35,12 +51,14 @@ def parse_monster_data(json_monster):
         languages=json_monster.get("Languages", ""),
         damage_vulnerabilities=json_monster.get("Damage Vulnerabilities", ""),
         senses=json_monster.get("Senses", ""),
-        challenge_rating=parse_float(json_monster.get("Challenge", "0")),
+        cr=cr,  # Set Challenge Rating
+        exp=exp,  # Set Experience Points
         actions=json_monster.get("Actions", ""),
         legendary_actions=json_monster.get("Legendary Actions", ""),
         traits=json_monster.get("Traits", ""),
         reactions=json_monster.get("Reactions", ""),
     )
+
 
 def import_monsters(json_file):
     """
@@ -48,26 +66,27 @@ def import_monsters(json_file):
     """
     with open(json_file, "r") as file:
         monsters_data = json.load(file)
-    
+
     with app.app_context():
         for json_monster in monsters_data:
             try:
                 # Check if the monster already exists in the database
                 existing_monster = Monster.query.filter_by(name=json_monster.get("name", "")).first()
-                
+
                 if existing_monster:
                     print(f"Replacing existing monster: {existing_monster.name}")
                     db.session.delete(existing_monster)  # Delete the existing monster
-                
+
                 # Add the new monster
                 monster = parse_monster_data(json_monster)
                 db.session.add(monster)
-            
+
             except Exception as e:
                 print(f"Error processing monster {json_monster.get('name', 'Unknown')}: {e}")
-        
+
         db.session.commit()
         print(f"Imported {len(monsters_data)} monsters successfully.")
+
 
 if __name__ == "__main__":
     # Replace with the path to your JSON file

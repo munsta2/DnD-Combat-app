@@ -92,6 +92,10 @@
             </li>
           </ul>
         </div>
+        <div class="difficulty-box">
+          <h4>Encounter Difficulty</h4>
+          <p>{{ encounterDifficulty }}</p>
+        </div>
         <button @click="saveEncounter">Save Encounter</button>
       </div>
 
@@ -142,6 +146,45 @@ export default {
         monster.name.toLowerCase().includes(this.monsterSearch.toLowerCase())
       );
     },
+    encounterDifficulty() {
+      const xpThresholds = {
+        1: { easy: 25, medium: 50, hard: 75, deadly: 100 },
+        2: { easy: 50, medium: 100, hard: 150, deadly: 200 },
+        3: { easy: 75, medium: 150, hard: 225, deadly: 400 },
+      };
+
+      let partyThresholds = { easy: 0, medium: 0, hard: 0, deadly: 0 };
+      this.selectedPlayers.forEach((player) => {
+        const level = player.level;
+        if (xpThresholds[level]) {
+          partyThresholds.easy += xpThresholds[level].easy;
+          partyThresholds.medium += xpThresholds[level].medium;
+          partyThresholds.hard += xpThresholds[level].hard;
+          partyThresholds.deadly += xpThresholds[level].deadly;
+        }
+      });
+
+      const totalMonsterXP = this.encounter.monsters.reduce(
+        (sum, monster) => sum + (monster.challengeRating || 0) * 100,
+        0
+      );
+
+      const monsterCount = this.encounter.monsters.length;
+      let multiplier = 1;
+      if (monsterCount === 2) multiplier = 1.5;
+      else if (monsterCount >= 3 && monsterCount <= 6) multiplier = 2;
+      else if (monsterCount >= 7 && monsterCount <= 10) multiplier = 2.5;
+      else if (monsterCount >= 11 && monsterCount <= 14) multiplier = 3;
+      else if (monsterCount >= 15) multiplier = 4;
+
+      const adjustedXP = totalMonsterXP * multiplier;
+
+      if (adjustedXP >= partyThresholds.deadly) return "Deadly";
+      if (adjustedXP >= partyThresholds.hard) return "Hard";
+      if (adjustedXP >= partyThresholds.medium) return "Medium";
+      if (adjustedXP >= partyThresholds.easy) return "Easy";
+      return "Trivial";
+    },
   },
   methods: {
     async fetchData() {
@@ -162,24 +205,17 @@ export default {
     },
     selectParty(party) {
       if (this.selectedParty?.id === party.id) {
-        // Deselect the current party
         this.selectedParty = null;
-
-        // Remove party players from selectedPlayers
         const partyPlayerIds = party.players.map((player) => player.id);
         this.selectedPlayers = this.selectedPlayers.filter(
           (player) => !partyPlayerIds.includes(player.id)
         );
-
         this.encounter.party_id = null;
         this.encounter.player_ids = this.selectedPlayers.map(
           (player) => player.id
         );
       } else {
-        // Select a new party
         this.selectedParty = party;
-
-        // Add party players to selectedPlayers if not already selected
         const newPlayers = party.players.filter(
           (player) =>
             !this.selectedPlayers.some(
@@ -187,7 +223,6 @@ export default {
             )
         );
         this.selectedPlayers = [...this.selectedPlayers, ...newPlayers];
-
         this.encounter.party_id = party.id;
         this.encounter.player_ids = this.selectedPlayers.map(
           (player) => player.id
@@ -196,15 +231,12 @@ export default {
     },
     togglePlayer(player) {
       if (this.selectedPlayers.some((p) => p.id === player.id)) {
-        // Remove player
         this.selectedPlayers = this.selectedPlayers.filter(
           (p) => p.id !== player.id
         );
       } else {
-        // Add player
         this.selectedPlayers.push(player);
       }
-
       this.encounter.party_id = this.selectedParty
         ? this.selectedParty.id
         : null;
@@ -218,6 +250,7 @@ export default {
         this.encounter.monsters.push({
           id: this.selectedMonster.id,
           name: this.selectedMonster.name,
+          challengeRating: this.selectedMonster.challengeRating,
           alias: "",
         });
         this.selectedMonster = null;
@@ -302,5 +335,15 @@ export default {
   background-color: rgba(255, 255, 255, 0.1);
   margin: 5px 0;
   border-radius: 5px;
+}
+
+.difficulty-box {
+  margin-top: 20px;
+  background-color: rgba(255, 255, 0, 0.1);
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 0, 0.8);
+  border-radius: 5px;
+  text-align: center;
+  color: #fff;
 }
 </style>
