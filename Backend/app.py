@@ -42,7 +42,7 @@ def git_update():
 
 @app.route('/')
 def index():
-    test = "hello"
+    test = "hello 1"
     return test
 if __name__ == "__main__":
     app.run(debug=True)
