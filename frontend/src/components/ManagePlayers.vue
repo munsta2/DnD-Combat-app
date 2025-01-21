@@ -84,14 +84,16 @@ export default {
     const router = useRouter();
 
     const fetchPlayers = async () => {
-      const response = await fetch("http://localhost:5000/api/players");
+      const response = await fetch(
+        `${process.env.VUE_APP_API_URL}/api/players`
+      );
       players.value = await response.json();
     };
 
     const addOrUpdatePlayer = async () => {
       const url = editMode.value
-        ? `http://localhost:5000/api/players/${currentPlayerId.value}`
-        : "http://localhost:5000/api/players";
+        ? `${process.env.VUE_APP_API_URL}/api/players/${currentPlayerId.value}`
+        : `${process.env.VUE_APP_API_URL}/api/players`;
       const method = editMode.value ? "PUT" : "POST";
 
       const response = await fetch(url, {
@@ -123,7 +125,7 @@ export default {
     };
 
     const removePlayer = async (id) => {
-      await fetch(`http://localhost:5000/api/players/${id}`, {
+      await fetch(`${process.env.VUE_APP_API_URL}/api/players/${id}`, {
         method: "DELETE",
       });
       players.value = players.value.filter((p) => p.id !== id);
