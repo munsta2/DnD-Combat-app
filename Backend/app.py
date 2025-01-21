@@ -31,7 +31,7 @@ with app.app_context():
     db.create_all()
 
 
-@app.route('/api/git_update', methods=['POST'])
+@app.route('/git_update', methods=['POST'])
 def git_update():
     repo = git.Repo('./DnD-Combat-app')
     origin = repo.remotes.origin
