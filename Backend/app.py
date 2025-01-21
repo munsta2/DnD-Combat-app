@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from routes.player_routes import player_bp
 from routes.party_routes import party_bp
 from routes.monster_routes import monster_bp
+from route.webhook_routes import webhook_bp
 from flask_migrate import Migrate
 from routes.encounter_routes import encounter_bp
 
@@ -25,20 +26,14 @@ app.register_blueprint(player_bp)
 app.register_blueprint(party_bp)
 app.register_blueprint(monster_bp)
 app.register_blueprint(encounter_bp)
+app.register_blueprint(webhook_bp)
 
 
 with app.app_context():
     db.create_all()
 
 
-@app.route('/git_update', methods=['POST'])
-def git_update():
-    repo = git.Repo('./DnD-Combat-app')
-    origin = repo.remotes.origin
-    repo.create_head('main',
-                     origin.refs.main).set_tracking_branch(origin.refs.main).checkout()
-    origin.pull()
-    return '', 200
+
 
 @app.route('/')
 def index():
