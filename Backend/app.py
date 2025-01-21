@@ -5,7 +5,7 @@ from flask_migrate import Migrate
 from routes.player_routes import player_bp
 from routes.party_routes import party_bp
 from routes.monster_routes import monster_bp
-from route.webhook_routes import webhook_bp
+from routes.webhook_routes import webhook_bp
 from flask_migrate import Migrate
 from routes.encounter_routes import encounter_bp
 
