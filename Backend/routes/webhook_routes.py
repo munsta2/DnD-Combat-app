@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from git import Repo
+import git
 webhook_bp = Blueprint('webhook', __name__)
 
 @webhook_bp.route('/webhook', methods=['POST'])
