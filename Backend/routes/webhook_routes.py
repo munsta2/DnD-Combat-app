@@ -10,7 +10,7 @@ def git_update():
         # Dynamically resolve the repository path
         REPO_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
         repo = Repo(REPO_PATH)
-
+        repo.create_head('main',origin.refs.main).set_tracking_branch(origin.refs.main).checkout()
         # Pull latest changes
         origin = repo.remotes.origin
         origin.pull()
