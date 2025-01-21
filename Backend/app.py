@@ -37,7 +37,7 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    test = "hello 3"
+    test = "hello testing"
     return test
 if __name__ == "__main__":
     app.run(debug=True)
