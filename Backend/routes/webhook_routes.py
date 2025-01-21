@@ -4,12 +4,12 @@ import git
 
 webhook_bp = Blueprint('webhook', __name__)
 
-@webhook_bp.route('/webhook', methods=['POST'])
+@webhook_bp.route('/api/webhook', methods=['POST'])
 def git_update():
         # Dynamically resolve the repository path
         REPO_PATH = os.path.join(os.path.dirname(__file__), '../../')
         repo = Repo(REPO_PATH)
-        repo.create_head('main(venv)',origin.refs.main).set_tracking_branch(origin.refs.main).checkout()
+        repo.create_head('main',origin.refs.main).set_tracking_branch(origin.refs.main).checkout()
         # Pull latest changes
         origin = repo.remotes.origin
         origin.pull()
