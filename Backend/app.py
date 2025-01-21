@@ -40,6 +40,10 @@ def git_update():
     origin.pull()
     return '', 200
 
+@app.route('/')
+def index():
+    test = "hello"
+    return test
 if __name__ == "__main__":
     app.run(debug=True)
 
