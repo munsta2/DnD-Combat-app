@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 
 webhook_bp = Blueprint('webhook', __name__)
 
-@app.route('/webhook', methods=['POST'])
+@app.route('/api/webhook', methods=['POST'])
 def git_update():
     repo = git.Repo('./DnD-Combat-app')
     origin = repo.remotes.origin
