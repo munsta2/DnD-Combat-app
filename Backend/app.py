@@ -33,7 +33,7 @@ with app.app_context():
 
 @app.route('/git_update', methods=['POST'])
 def git_update():
-    repo = git.Repo('../')
+    repo = git.Repo('./DnD-Combat-app')
     origin = repo.remotes.origin
     repo.create_head('main',
                      origin.refs.main).set_tracking_branch(origin.refs.main).checkout()
@@ -44,7 +44,7 @@ def get_repo():
     # REPO_PATH = os.path.join(os.path.dirname(__file__), '../../')
 
     try:
-        repo = git.Repo('../')
+        repo = git.Repo('./DnD-Combat-app')
         current_branch = repo.active_branch.name
         print(f"Current branch: {current_branch}")
         return f"Current branch: {current_branch}", 200  # Return branch name as response with status code 200
