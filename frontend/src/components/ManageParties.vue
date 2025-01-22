@@ -79,13 +79,17 @@ export default {
     const editingParty = ref(null);
 
     const fetchPlayers = async () => {
-      const response = await fetch("http://localhost:5000/api/players");
+      const response = await fetch(
+        `${process.env.VUE_APP_API_URL}/api/players`
+      );
       players.value = await response.json();
       console.log("Players loaded:", players.value); // Debugging output
     };
 
     const fetchParties = async () => {
-      const response = await fetch("http://localhost:5000/api/parties");
+      const response = await fetch(
+        `${process.env.VUE_APP_API_URL}/api/parties`
+      );
       const data = await response.json();
       parties.value = data.map((party) => ({
         ...party,
@@ -94,18 +98,21 @@ export default {
     };
 
     const createParty = async () => {
-      const response = await fetch("http://localhost:5000/api/parties", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newParty.value),
-      });
+      const response = await fetch(
+        `${process.env.VUE_APP_API_URL}http://localhost:5000/api/parties`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newParty.value),
+        }
+      );
       const createdParty = await response.json();
       parties.value.push(createdParty);
       newParty.value = { name: "", playerIds: [] };
     };
 
     const deleteParty = async (partyId) => {
-      await fetch(`http://localhost:5000/api/parties/${partyId}`, {
+      await fetch(`${process.env.VUE_APP_API_URL}/api/parties/${partyId}`, {
         method: "DELETE",
       });
       parties.value = parties.value.filter((p) => p.id !== partyId);
@@ -120,7 +127,7 @@ export default {
 
     const savePartyChanges = async () => {
       const response = await fetch(
-        `http://localhost:5000/api/parties/${editingParty.value.id}`,
+        `${process.env.VUE_APP_API_URL}/api/parties/${editingParty.value.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
