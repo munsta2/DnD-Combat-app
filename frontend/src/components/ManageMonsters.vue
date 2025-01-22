@@ -365,7 +365,17 @@ export default {
           body: JSON.stringify(newMonster.value),
         }
       );
+      if (!response.ok) {
+        // Handle non-2xx responses (e.g., 400 or 500 errors)
+        const errorDetails = await response.json();
+        console.error("Failed to add monster:", errorDetails);
+        alert(
+          `Failed to add monster: ${errorDetails.error || "Unknown error"}`
+        );
+        return;
+      }
       const createdMonster = await response.json();
+      alert("Monster added successfully!");
       monsters.value.push(createdMonster);
       newMonster.value = {
         name: "",

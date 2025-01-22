@@ -8,6 +8,7 @@ def manage_monsters():
     if request.method == "POST":
         try:
             data = request.json
+            print(data)
             new_monster = Monster(
                 name=data.get("name", ""),
                 size=data.get("size", ""),
@@ -25,7 +26,7 @@ def manage_monsters():
                 languages=data.get("languages", ""),
                 damage_vulnerabilities=data.get("damageVulnerabilities", ""),
                 senses=data.get("senses", ""),
-                challenge_rating=data.get("cr", 0.0),
+                cr=data.get("cr", 0.0),
                 exp=data.get("exp",0.0),
                 actions=data.get("actions", ""),
                 legendary_actions=data.get("legendaryActions", ""),
