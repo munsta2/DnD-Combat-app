@@ -342,9 +342,11 @@ export default {
     };
 
     const filteredMonsters = computed(() => {
-      return monsters.value.filter((monster) =>
-        monster.name.toLowerCase().includes(searchTerm.value.toLowerCase())
-      );
+      return monsters.value.filter((monster) => {
+        const monsterName = monster?.name || ""; // Default to empty string if undefined
+        const search = searchTerm.value || ""; // Default to empty string if undefined
+        return monsterName.toLowerCase().includes(search.toLowerCase());
+      });
     });
 
     const fetchMonsters = async () => {
