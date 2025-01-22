@@ -25,7 +25,8 @@ def manage_monsters():
                 languages=data.get("languages", ""),
                 damage_vulnerabilities=data.get("damageVulnerabilities", ""),
                 senses=data.get("senses", ""),
-                challenge_rating=data.get("challengeRating", 0.0),
+                challenge_rating=data.get("cr", 0.0),
+                exp=data.get("exp",0.0),
                 actions=data.get("actions", ""),
                 legendary_actions=data.get("legendaryActions", ""),
                 traits=data.get("traits", ""),
@@ -75,7 +76,8 @@ def modify_monster(monster_id):
         monster.languages = data.get("languages", monster.languages)
         monster.damage_vulnerabilities = data.get("damageVulnerabilities", monster.damage_vulnerabilities)
         monster.senses = data.get("senses", monster.senses)
-        monster.challenge_rating = data.get("challengeRating", monster.challenge_rating)
+        monster.cr = data.get("cr", monster.exp)
+        monster.exp = data.get("exp",monster.exp)
         db.session.commit()
         return jsonify({
             "id": monster.id,
@@ -94,7 +96,8 @@ def modify_monster(monster_id):
             "languages": monster.languages,
             "damageVulnerabilities": monster.damage_vulnerabilities,
             "senses": monster.senses,
-            "challengeRating": monster.challenge_rating,
+            "cr": monster.cr,
+            "exp": monster.exp,
         })
 
     if request.method == "DELETE":
