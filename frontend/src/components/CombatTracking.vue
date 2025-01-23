@@ -83,9 +83,21 @@
             :key="combatant.id"
             :class="{ active: index === currentTurnIndex }"
           >
-            <strong>{{ combatant.name }}</strong> - HP: {{ combatant.hp }}/
-            {{ combatant.maxHp }}
-            | AC: {{ combatant.ac }} | Initiative:
+            <strong>
+              <template v-if="combatant.type === 'monster'">
+                <input
+                  type="text"
+                  v-model="combatant.alias"
+                  @change="updateMonsterAlias(index, combatant.alias)"
+                  style="width: 150px"
+                />
+              </template>
+              <template v-else>
+                {{ combatant.name }}
+              </template>
+            </strong>
+            - HP: {{ combatant.hp }}/{{ combatant.maxHp }} | AC:
+            {{ combatant.ac }} | Initiative:
             <input
               type="number"
               v-model.number="combatant.initiative"
@@ -200,9 +212,12 @@ export default {
         .then((data) => {
           this.combatants = data.turn_order.map((combatant) => ({
             ...combatant,
-            initiative: 0,
+            initiative: 0, // Default initiative
           }));
           this.currentTurnIndex = 0;
+
+          // Assign aliases to all monsters
+          this.assignMonsterNumbers();
         })
         .catch((error) => {
           console.error("Error loading encounter:", error);
@@ -220,11 +235,23 @@ export default {
       this.combatants.sort((a, b) => b.initiative - a.initiative);
       this.initiativesSet = true;
     },
+    assignMonsterNumbers() {
+      let monsterIndex = 1;
+      this.combatants.forEach((combatant) => {
+        if (combatant.type === "monster") {
+          combatant.alias = `${combatant.name} ${monsterIndex}`;
+          monsterIndex++;
+        } else {
+          combatant.alias = combatant.name; // Keep players' names unchanged
+        }
+      });
+    },
     addMonster() {
       if (this.selectedMonster) {
         const newMonster = {
           id: `${this.selectedMonster.id}-${Date.now()}`,
           name: this.selectedMonster.name,
+          alias: "", // Placeholder for the dynamically assigned name
           type: "monster",
           hp: this.selectedMonster.hp,
           maxHp: this.selectedMonster.hp,
@@ -233,8 +260,15 @@ export default {
           initiative: 0,
         };
         this.combatants.push(newMonster);
+
+        // Reassign numbers to all monsters
+        this.assignMonsterNumbers();
       }
     },
+    updateMonsterAlias(index, alias) {
+      this.combatants[index].alias = alias;
+    },
+
     applyDamage() {
       if (!this.selectedCombatant || !this.damageAmount) {
         alert("Please select a combatant and enter damage.");
@@ -262,8 +296,16 @@ export default {
     },
     updateInitiative(index, initiative) {
       this.combatants[index].initiative = initiative;
+
+      const activeCombatantId = this.combatants[this.currentTurnIndex]?.id;
+
       this.combatants.sort((a, b) => b.initiative - a.initiative);
-      this.currentTurnIndex = 0;
+
+      const newIndex = this.combatants.findIndex(
+        (combatant) => combatant.id === activeCombatantId
+      );
+
+      this.currentTurnIndex = newIndex !== -1 ? newIndex : 0;
     },
   },
   mounted() {
