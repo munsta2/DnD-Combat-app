@@ -9,15 +9,6 @@
       </p>
       <!-- Dice Roll Section -->
       <div class="dice-roll-section">
-        <div class="dice-buttons">
-          <button
-            v-for="sides in [4, 6, 8, 10, 12]"
-            :key="sides"
-            @click="rollDice(sides)"
-          >
-            🎲 D{{ sides }}
-          </button>
-        </div>
         <div class="dice-controls">
           <label for="dice-count">Number of Dice:</label>
           <input
@@ -25,13 +16,23 @@
             type="number"
             v-model.number="numberOfDice"
             min="1"
-            style="width: 50px; margin-left: 10px"
+            style="width: 60px; margin-left: 10px; text-align: center"
           />
+        </div>
+        <div class="dice-buttons">
+          <button
+            v-for="sides in [4, 6, 8, 10, 12]"
+            :key="sides"
+            @click="rollDice(sides)"
+            class="dice-button"
+          >
+            🎲 D{{ sides }}
+          </button>
         </div>
       </div>
       <div v-if="diceRollResult.length > 0" class="dice-roll-result">
         <p>
-          You rolled:
+          <strong>Rolls:</strong>
           <span v-for="(roll, index) in diceRollResult" :key="index">
             [{{ roll }}]{{ index < diceRollResult.length - 1 ? "," : "" }}
           </span>
@@ -118,7 +119,7 @@
               type="text"
               v-model="combatant.displayName"
               @input="updateDisplayName"
-              style="width: 150px"
+              class="combatant-input"
             />
             - HP: {{ combatant.hp }}/{{ combatant.maxHp }} | AC:
             {{ combatant.ac }} | Initiative:
@@ -126,13 +127,12 @@
               type="number"
               v-model.number="combatant.initiative"
               @change="updateInitiative(index, combatant.initiative)"
-              style="width: 50px"
+              class="combatant-input"
             />
           </li>
         </ul>
       </div>
 
-      <!-- Apply Damage Section -->
       <!-- Apply Damage Section -->
       <div
         class="apply-damage card"
@@ -378,24 +378,62 @@ export default {
 
 .combat-tracking-page {
   font-family: Arial, sans-serif;
-  background: #f9f9f9;
+  background: #f4f4f9;
   padding: 20px;
+  color: #333;
 }
 
 .header {
   text-align: center;
   margin-bottom: 20px;
+  padding: 15px;
+  background: #007bff;
+  color: white;
+  border-radius: 8px;
+}
+
+.dice-roll-section {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dice-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.dice-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.dice-button:hover {
+  background-color: #0056b3;
+}
+
+.dice-roll-result {
+  margin-top: 10px;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #007bff;
 }
 
 .combat-ui {
   display: grid;
-  grid-template-columns: 1fr 2fr 2fr;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
 }
 
 .card {
-  background: #fff;
-  padding: 15px;
+  background: white;
+  padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
@@ -428,8 +466,11 @@ select {
 }
 
 .combatants-list li {
-  padding: 5px;
+  padding: 10px;
   border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .combatants-list li.active {
@@ -437,18 +478,10 @@ select {
   font-weight: bold;
 }
 
-.dice-roll-section {
-  margin-top: 10px;
-}
-
-.dice-roll-section button {
-  margin-right: 10px;
-  font-size: 1.2em;
-}
-.dice-roll-result {
-  margin-top: 10px;
-  font-size: 1.2em;
-  color: #007bff;
-  font-weight: bold;
+.combatant-input {
+  margin-left: 5px;
+  padding: 5px;
+  font-size: 14px;
+  width: auto;
 }
 </style>
