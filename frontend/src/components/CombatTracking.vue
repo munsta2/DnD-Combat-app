@@ -1,50 +1,17 @@
 <template>
-  <div class="combat-tracking-page">
-    <!-- Header -->
-    <header class="header">
+  <div class="combat-tracking">
+    <header class="hero">
       <h1>Combat Tracking</h1>
       <p>
         Manage combatants, track turns, apply damage, and dynamically manage
         combatants.
       </p>
-      <!-- Dice Roll Section -->
-      <div class="dice-roll-section">
-        <div class="dice-controls">
-          <label for="dice-count">Number of Dice:</label>
-          <input
-            id="dice-count"
-            type="number"
-            v-model.number="numberOfDice"
-            min="1"
-            style="width: 60px; margin-left: 10px; text-align: center"
-          />
-        </div>
-        <div class="dice-buttons">
-          <button
-            v-for="sides in [4, 6, 8, 10, 12]"
-            :key="sides"
-            @click="rollDice(sides)"
-            class="dice-button"
-          >
-            🎲 D{{ sides }}
-          </button>
-        </div>
-      </div>
-      <div v-if="diceRollResult.length > 0" class="dice-roll-result">
-        <p>
-          <strong>Rolls:</strong>
-          <span v-for="(roll, index) in diceRollResult" :key="index">
-            [{{ roll }}]{{ index < diceRollResult.length - 1 ? "," : "" }}
-          </span>
-        </p>
-        <p><strong>Total:</strong> {{ diceRollTotal }}</p>
-      </div>
     </header>
 
-    <div class="combat-ui">
+    <div class="content">
       <!-- Encounter Selection -->
-      <div class="encounter-selection card">
-        <h2>Select Encounter</h2>
+      <div class="encounter-selection section">
+        <h3>Select Encounter</h3>
         <select v-model="selectedEncounter" @change="loadEncounter">
           <option value="" disabled selected>Select an encounter</option>
           <option
@@ -58,8 +25,8 @@
       </div>
 
       <!-- Add Monster Section -->
-      <div class="add-monster card">
-        <h2>Add Monster</h2>
+      <div class="add-monster section">
+        <h3>Add Monster</h3>
         <select v-model="selectedMonster">
           <option value="" disabled selected>Select a monster</option>
           <option
@@ -73,43 +40,43 @@
         <button @click="addMonster">Add Monster</button>
       </div>
 
-      <!-- Roll Initiative for Monsters -->
-      <div
-        class="roll-initiative card"
-        v-if="combatants.length > 0 && !initiativesSet"
-      >
-        <h2>Roll Initiatives for Monsters</h2>
-        <button @click="rollMonsterInitiatives">
-          Roll Monster Initiatives
-        </button>
+      <!-- Dice Roll Section -->
+      <div class="dice-roll-section section">
+        <h3>Roll Dice</h3>
+        <div class="dice-controls">
+          <label for="dice-count">Number of Dice:</label>
+          <input
+            id="dice-count"
+            type="number"
+            v-model.number="numberOfDice"
+            min="1"
+            style="width: 50px; margin-left: 10px"
+          />
+        </div>
+        <div class="dice-buttons">
+          <button
+            v-for="sides in [4, 6, 8, 10, 12]"
+            :key="sides"
+            @click="rollDice(sides)"
+          >
+            🎲 D{{ sides }}
+          </button>
+        </div>
+        <div v-if="diceRollResult.length > 0" class="dice-roll-result">
+          <p>
+            You rolled:
+            <span v-for="(roll, index) in diceRollResult" :key="index">
+              [{{ roll }}]{{ index < diceRollResult.length - 1 ? "," : "" }}
+            </span>
+          </p>
+          <p><strong>Total:</strong> {{ diceRollTotal }}</p>
+        </div>
       </div>
 
-      <!-- Initiative Input -->
-      <div
-        class="initiative-input card"
-        v-if="combatants.length > 0 && !initiativesSet"
-      >
-        <h2>Set Initiative</h2>
-        <ul>
-          <li v-for="combatant in combatants" :key="combatant.id">
-            <strong>{{ combatant.displayName }}</strong>
-            <input
-              type="number"
-              v-model.number="combatant.initiative"
-              placeholder="Enter Initiative"
-            />
-          </li>
-        </ul>
-        <button @click="setInitiatives">Set Initiatives</button>
-      </div>
-
-      <!-- Combatants List -->
-      <div
-        class="combatants-list card"
-        v-if="combatants.length > 0 && initiativesSet"
-      >
-        <h2>Combatants</h2>
-        <ul>
+      <!-- Combatants Section -->
+      <div class="combatants-section section">
+        <h3>Combatants</h3>
+        <ul class="styled-list">
           <li
             v-for="(combatant, index) in combatants"
             :key="combatant.id"
@@ -119,7 +86,7 @@
               type="text"
               v-model="combatant.displayName"
               @input="updateDisplayName"
-              class="combatant-input"
+              style="width: 150px"
             />
             - HP: {{ combatant.hp }}/{{ combatant.maxHp }} | AC:
             {{ combatant.ac }} | Initiative:
@@ -127,18 +94,15 @@
               type="number"
               v-model.number="combatant.initiative"
               @change="updateInitiative(index, combatant.initiative)"
-              class="combatant-input"
+              style="width: 50px"
             />
           </li>
         </ul>
       </div>
 
       <!-- Apply Damage Section -->
-      <div
-        class="apply-damage card"
-        v-if="combatants.length > 0 && initiativesSet"
-      >
-        <h2>Apply Damage</h2>
+      <div class="apply-damage section">
+        <h3>Apply Damage</h3>
         <label for="combatant-select">Select Combatant:</label>
         <select id="combatant-select" v-model="selectedCombatant">
           <option
@@ -159,26 +123,10 @@
         <button @click="applyDamage">Apply</button>
       </div>
 
-      <!-- Next Turn and End Combat Buttons -->
-      <div
-        class="action-buttons card"
-        v-if="combatants.length > 0 && initiativesSet"
-      >
+      <!-- Next Turn and End Combat -->
+      <div class="action-buttons section">
         <button @click="nextTurn">Next Turn</button>
         <button @click="endCombat" class="end-combat">End Combat</button>
-      </div>
-
-      <!-- Stat Block -->
-      <div class="stat-block card" v-if="activeCombatant && initiativesSet">
-        <h2>Statblock</h2>
-        <p><strong>Name:</strong> {{ activeCombatant.displayName }}</p>
-        <p>
-          <strong>HP:</strong> {{ activeCombatant.hp }}/
-          {{ activeCombatant.maxHp }}
-        </p>
-        <p><strong>AC:</strong> {{ activeCombatant.ac }}</p>
-        <p><strong>Type:</strong> {{ activeCombatant.type }}</p>
-        <p><strong>Initiative:</strong> {{ activeCombatant.initiative }}</p>
       </div>
     </div>
   </div>
@@ -367,6 +315,52 @@ export default {
 </script>
 
 <style>
+.combat-tracking {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "Georgia", serif;
+  background: url("@/assets/fantasy-3756975_1280.jpg") no-repeat center center
+    fixed;
+  background-size: cover;
+  min-height: 100vh;
+  color: #fff;
+  padding: 20px;
+}
+
+.content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+  gap: 20px;
+}
+
+.section {
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+  flex: 1 1 45%;
+  margin: 10px;
+}
+
+.styled-list {
+  list-style: none;
+  padding: 0;
+}
+
+.styled-list li {
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 5px 0;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.styled-list li.active {
+  background-color: rgba(0, 128, 255, 0.5);
+}
+
 .end-combat {
   background-color: #ff4d4d;
   color: white;
@@ -376,112 +370,14 @@ export default {
   background-color: #e63939;
 }
 
-.combat-tracking-page {
-  font-family: Arial, sans-serif;
-  background: #f4f4f9;
-  padding: 20px;
-  color: #333;
-}
-
-.header {
-  text-align: center;
-  margin-bottom: 20px;
-  padding: 15px;
-  background: #007bff;
-  color: white;
-  border-radius: 8px;
-}
-
-.dice-roll-section {
-  margin-top: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.dice-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-.dice-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  font-size: 16px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.dice-button:hover {
-  background-color: #0056b3;
+.dice-roll-section .dice-buttons button {
+  margin-right: 10px;
 }
 
 .dice-roll-result {
   margin-top: 10px;
   font-size: 1.2em;
-  font-weight: bold;
   color: #007bff;
-}
-
-.combat-ui {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.card {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-input,
-select {
-  width: 100%;
-  margin: 5px 0;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.combatants-list ul {
-  list-style: none;
-  padding: 0;
-}
-
-.combatants-list li {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.combatants-list li.active {
-  background: #e0ffe0;
   font-weight: bold;
-}
-
-.combatant-input {
-  margin-left: 5px;
-  padding: 5px;
-  font-size: 14px;
-  width: auto;
 }
 </style>
