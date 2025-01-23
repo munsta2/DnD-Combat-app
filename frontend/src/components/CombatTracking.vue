@@ -7,6 +7,37 @@
         Manage combatants, track turns, apply damage, and dynamically manage
         combatants.
       </p>
+      <!-- Dice Roll Section -->
+      <div class="dice-roll-section">
+        <div class="dice-buttons">
+          <button
+            v-for="sides in [4, 6, 8, 10, 12]"
+            :key="sides"
+            @click="rollDice(sides)"
+          >
+            🎲 D{{ sides }}
+          </button>
+        </div>
+        <div class="dice-controls">
+          <label for="dice-count">Number of Dice:</label>
+          <input
+            id="dice-count"
+            type="number"
+            v-model.number="numberOfDice"
+            min="1"
+            style="width: 50px; margin-left: 10px"
+          />
+        </div>
+      </div>
+      <div v-if="diceRollResult.length > 0" class="dice-roll-result">
+        <p>
+          You rolled:
+          <span v-for="(roll, index) in diceRollResult" :key="index">
+            [{{ roll }}]{{ index < diceRollResult.length - 1 ? "," : "" }}
+          </span>
+        </p>
+        <p><strong>Total:</strong> {{ diceRollTotal }}</p>
+      </div>
     </header>
 
     <div class="combat-ui">
@@ -60,7 +91,7 @@
         <h2>Set Initiative</h2>
         <ul>
           <li v-for="combatant in combatants" :key="combatant.id">
-            <strong>{{ combatant.name }}</strong>
+            <strong>{{ combatant.displayName }}</strong>
             <input
               type="number"
               v-model.number="combatant.initiative"
@@ -83,19 +114,12 @@
             :key="combatant.id"
             :class="{ active: index === currentTurnIndex }"
           >
-            <strong>
-              <template v-if="combatant.type === 'monster'">
-                <input
-                  type="text"
-                  v-model="combatant.alias"
-                  @change="updateMonsterAlias(index, combatant.alias)"
-                  style="width: 150px"
-                />
-              </template>
-              <template v-else>
-                {{ combatant.name }}
-              </template>
-            </strong>
+            <input
+              type="text"
+              v-model="combatant.displayName"
+              @input="updateDisplayName"
+              style="width: 150px"
+            />
             - HP: {{ combatant.hp }}/{{ combatant.maxHp }} | AC:
             {{ combatant.ac }} | Initiative:
             <input
@@ -109,6 +133,7 @@
       </div>
 
       <!-- Apply Damage Section -->
+      <!-- Apply Damage Section -->
       <div
         class="apply-damage card"
         v-if="combatants.length > 0 && initiativesSet"
@@ -121,7 +146,7 @@
             :key="combatant.id"
             :value="combatant.id"
           >
-            {{ combatant.name }}
+            {{ combatant.displayName }}
           </option>
         </select>
         <label for="damage-input">Damage:</label>
@@ -146,7 +171,7 @@
       <!-- Stat Block -->
       <div class="stat-block card" v-if="activeCombatant && initiativesSet">
         <h2>Statblock</h2>
-        <p><strong>Name:</strong> {{ activeCombatant.name }}</p>
+        <p><strong>Name:</strong> {{ activeCombatant.displayName }}</p>
         <p>
           <strong>HP:</strong> {{ activeCombatant.hp }}/
           {{ activeCombatant.maxHp }}
@@ -172,11 +197,16 @@ export default {
       selectedCombatant: null,
       damageAmount: 0,
       initiativesSet: false,
+      numberOfDice: 1,
+      diceRollResult: [],
     };
   },
   computed: {
     activeCombatant() {
       return this.combatants[this.currentTurnIndex];
+    },
+    diceRollTotal() {
+      return this.diceRollResult.reduce((total, roll) => total + roll, 0);
     },
   },
   methods: {
@@ -190,6 +220,13 @@ export default {
           console.error("Error fetching encounters:", error);
         });
     },
+    rollDice(sides) {
+      this.diceRollResult = [];
+      for (let i = 0; i < this.numberOfDice; i++) {
+        this.diceRollResult.push(Math.floor(Math.random() * sides) + 1);
+      }
+    },
+
     fetchAvailableMonsters() {
       fetch(`${process.env.VUE_APP_API_URL}/api/monsters`)
         .then((response) => response.json())
@@ -210,14 +247,29 @@ export default {
       })
         .then((response) => response.json())
         .then((data) => {
-          this.combatants = data.turn_order.map((combatant) => ({
-            ...combatant,
-            initiative: 0, // Default initiative
-          }));
-          this.currentTurnIndex = 0;
+          let monsterCount = 0; // Counter to assign unique numbers to monsters
 
-          // Assign aliases to all monsters
-          this.assignMonsterNumbers();
+          // Assign displayName and count existing monsters
+          this.combatants = data.turn_order.map((combatant) => {
+            if (combatant.type === "monster") {
+              monsterCount += 1; // Increment monster count
+              return {
+                ...combatant,
+                displayName: `${combatant.name} ${monsterCount}`,
+                initiative: combatant.initiative || 0,
+              };
+            } else {
+              // Players keep their original name
+              return {
+                ...combatant,
+                displayName: combatant.name,
+                initiative: combatant.initiative || 0,
+              };
+            }
+          });
+
+          this.monsterCounter = monsterCount; // Set monster counter for future additions
+          this.currentTurnIndex = 0; // Reset turn order index
         })
         .catch((error) => {
           console.error("Error loading encounter:", error);
@@ -248,23 +300,22 @@ export default {
     },
     addMonster() {
       if (this.selectedMonster) {
+        this.monsterCounter += 1; // Increment the monster counter
         const newMonster = {
           id: `${this.selectedMonster.id}-${Date.now()}`,
           name: this.selectedMonster.name,
-          alias: "", // Placeholder for the dynamically assigned name
           type: "monster",
           hp: this.selectedMonster.hp,
           maxHp: this.selectedMonster.hp,
           ac: this.selectedMonster.ac,
           dex: this.selectedMonster.dex || 10,
           initiative: 0,
+          displayName: `${this.selectedMonster.name} ${this.monsterCounter}`, // Assign new suffix
         };
-        this.combatants.push(newMonster);
-
-        // Reassign numbers to all monsters
-        this.assignMonsterNumbers();
+        this.combatants.push(newMonster); // Add the new monster
       }
     },
+
     updateMonsterAlias(index, alias) {
       this.combatants[index].alias = alias;
     },
@@ -383,6 +434,21 @@ select {
 
 .combatants-list li.active {
   background: #e0ffe0;
+  font-weight: bold;
+}
+
+.dice-roll-section {
+  margin-top: 10px;
+}
+
+.dice-roll-section button {
+  margin-right: 10px;
+  font-size: 1.2em;
+}
+.dice-roll-result {
+  margin-top: 10px;
+  font-size: 1.2em;
+  color: #007bff;
   font-weight: bold;
 }
 </style>
