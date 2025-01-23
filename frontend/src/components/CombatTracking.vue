@@ -162,9 +162,7 @@
           <p><strong>Senses:</strong> {{ statBlock.senses }}</p>
           <p><strong>Languages:</strong> {{ statBlock.languages }}</p>
           <p>
-            <strong>Challenge:</strong> {{ statBlock.cr }} ({{
-              statBlock.exp
-            }}
+            <strong>Challenge:</strong> {{ statBlock.cr }} ({{ statBlock.exp }}
             XP)
           </p>
         </div>
