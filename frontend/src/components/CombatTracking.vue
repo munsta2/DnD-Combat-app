@@ -40,6 +40,16 @@
         <button @click="addMonster">Add Monster</button>
       </div>
 
+      <!-- Action Buttons (Roll Initiative, Next Turn, End Combat) -->
+      <div class="action-section section">
+        <h3>Combat Actions</h3>
+        <button @click="rollMonsterInitiatives">
+          Roll Monster Initiatives
+        </button>
+        <button @click="nextTurn">Next Turn</button>
+        <button @click="endCombat" class="end-combat">End Combat</button>
+      </div>
+
       <!-- Dice Roll Section -->
       <div class="dice-roll-section section">
         <h3>Roll Dice</h3>
@@ -123,10 +133,61 @@
         <button @click="applyDamage">Apply</button>
       </div>
 
-      <!-- Next Turn and End Combat -->
-      <div class="action-buttons section">
-        <button @click="nextTurn">Next Turn</button>
-        <button @click="endCombat" class="end-combat">End Combat</button>
+      <!-- Stat Block Section -->
+      <div class="stat-block section" v-if="activeCombatant && statBlock">
+        <h3>{{ statBlock.name }}</h3>
+        <p>
+          {{ statBlock.size }} {{ statBlock.type }}, {{ statBlock.alignment }}
+        </p>
+        <p><strong>Armor Class:</strong> {{ statBlock.ac }}</p>
+        <p><strong>Hit Points:</strong> {{ statBlock.hp }}</p>
+        <p><strong>Speed:</strong> {{ statBlock.speed }}</p>
+
+        <div class="abilities">
+          <p><strong>STR:</strong> {{ statBlock.stats.str }}</p>
+          <p><strong>DEX:</strong> {{ statBlock.stats.dex }}</p>
+          <p><strong>CON:</strong> {{ statBlock.stats.con }}</p>
+          <p><strong>INT:</strong> {{ statBlock.stats.int }}</p>
+          <p><strong>WIS:</strong> {{ statBlock.stats.wis }}</p>
+          <p><strong>CHA:</strong> {{ statBlock.stats.cha }}</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="details">
+          <p>
+            <strong>Damage Vulnerabilities:</strong>
+            {{ statBlock.damageVulnerabilities || "None" }}
+          </p>
+          <p><strong>Senses:</strong> {{ statBlock.senses }}</p>
+          <p><strong>Languages:</strong> {{ statBlock.languages }}</p>
+          <p>
+            <strong>Challenge:</strong> {{ statBlock.cr }} ({{
+              statBlock.exp
+            }}
+            XP)
+          </p>
+        </div>
+
+        <div v-if="statBlock.actions" class="actions">
+          <h4>Actions</h4>
+          <div v-html="statBlock.actions"></div>
+        </div>
+
+        <div v-if="statBlock.legendaryActions" class="actions">
+          <h4>Legendary Actions</h4>
+          <div v-html="statBlock.legendaryActions"></div>
+        </div>
+
+        <div v-if="statBlock.traits" class="actions">
+          <h4>Traits</h4>
+          <div v-html="statBlock.traits"></div>
+        </div>
+
+        <div v-if="statBlock.reactions" class="actions">
+          <h4>Reactions</h4>
+          <div v-html="statBlock.reactions"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -147,17 +208,34 @@ export default {
       initiativesSet: false,
       numberOfDice: 1,
       diceRollResult: [],
+      statBlock: null,
     };
   },
   computed: {
     activeCombatant() {
-      return this.combatants[this.currentTurnIndex];
+      return this.combatants[this.currentTurnIndex] || null;
     },
     diceRollTotal() {
       return this.diceRollResult.reduce((total, roll) => total + roll, 0);
     },
   },
   methods: {
+    fetchStatBlock(combatant) {
+      console.log("I am being called");
+      if (combatant.type === "monster") {
+        fetch(`${process.env.VUE_APP_API_URL}/api/monsters/${combatant.id}`)
+          .then((response) => response.json())
+          .then((data) => {
+            this.statBlock = data;
+            console.log(data);
+          })
+          .catch((error) => {
+            console.error("Error fetching stat block:", error);
+          });
+      } else {
+        this.statBlock = null; // Clear stat block for non-monster combatants
+      }
+    },
     fetchEncounters() {
       fetch(`${process.env.VUE_APP_API_URL}/api/encounters`)
         .then((response) => response.json())
@@ -174,7 +252,9 @@ export default {
         this.diceRollResult.push(Math.floor(Math.random() * sides) + 1);
       }
     },
-
+    calculateDexMod(dex) {
+      return Math.floor((dex - 10) / 2);
+    },
     fetchAvailableMonsters() {
       fetch(`${process.env.VUE_APP_API_URL}/api/monsters`)
         .then((response) => response.json())
@@ -211,7 +291,7 @@ export default {
               return {
                 ...combatant,
                 displayName: combatant.name,
-                initiative: combatant.initiative || 0,
+                initiative: 0,
               };
             }
           });
@@ -230,6 +310,7 @@ export default {
           combatant.initiative = Math.floor(Math.random() * 20) + 1 + dexMod;
         }
       });
+      this.combatants.sort((a, b) => b.initiative - a.initiative);
     },
     setInitiatives() {
       this.combatants.sort((a, b) => b.initiative - a.initiative);
@@ -283,6 +364,7 @@ export default {
     nextTurn() {
       this.currentTurnIndex =
         (this.currentTurnIndex + 1) % this.combatants.length;
+      this.fetchStatBlock(this.activeCombatant); // Update stat block on turn change
     },
     endCombat() {
       this.selectedEncounter = null;
@@ -305,6 +387,16 @@ export default {
       );
 
       this.currentTurnIndex = newIndex !== -1 ? newIndex : 0;
+    },
+  },
+  watch: {
+    activeCombatant: {
+      immediate: true,
+      handler(newCombatant) {
+        if (newCombatant) {
+          this.fetchStatBlock(newCombatant);
+        }
+      },
     },
   },
   mounted() {
@@ -379,5 +471,97 @@ export default {
   font-size: 1.2em;
   color: #007bff;
   font-weight: bold;
+}
+
+.stat-block {
+  background-color: #fdf6e3; /* Light parchment background */
+  color: #2c2c2c; /* Dark text color for readability */
+  padding: 20px;
+  border-radius: 10px;
+  border: 2px solid #b68973; /* Slightly darker parchment border */
+  font-family: "Georgia", serif;
+  margin: 20px auto;
+  max-width: 600px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.stat-block h3 {
+  font-size: 1.8em;
+  color: #7a4214; /* Deep brown for headers */
+  text-align: center;
+  text-transform: uppercase;
+  border-bottom: 2px solid #b68973;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.stat-block p {
+  margin: 5px 0;
+}
+
+.stat-block h4 {
+  margin-top: 20px;
+  font-size: 1.4em;
+  color: #7a4214;
+  text-transform: uppercase;
+  text-align: left;
+  border-bottom: 1px solid #b68973;
+  padding-bottom: 5px;
+}
+
+.stat-block .abilities {
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.stat-block .abilities p {
+  flex: 1;
+  font-size: 1.1em;
+  margin: 0;
+}
+
+.stat-block .details {
+  background-color: #fdfaf5;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #d7c4a1;
+  margin-top: 10px;
+}
+
+.stat-block .details p {
+  font-size: 0.95em;
+  margin: 5px 0;
+}
+
+.stat-block .divider {
+  height: 2px;
+  background-color: #b68973;
+  margin: 15px 0;
+}
+
+.stat-block .actions {
+  margin-top: 10px;
+  background-color: #fdfaf5;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #d7c4a1;
+}
+
+.stat-block .actions h4 {
+  margin-bottom: 5px;
+  font-size: 1.3em;
+}
+
+.stat-block .actions div {
+  margin: 5px 0;
+  font-size: 1em;
+  color: #2c2c2c;
+}
+
+.stat-block strong {
+  font-weight: bold;
+  color: #7a4214;
 }
 </style>

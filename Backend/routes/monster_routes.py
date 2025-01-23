@@ -53,6 +53,44 @@ def get_monsters():
     return jsonify([{"id": m.id, "name": m.name} for m in monsters])
 
 
+@monster_bp.route("/api/monsters/<int:monster_id>", methods=["GET", "PUT", "DELETE"])
+def handle_monster(monster_id):
+    monster = Monster.query.get(monster_id)
+    if not monster:
+        return jsonify({"error": "Monster not found"}), 404
+
+    if request.method == "GET":
+        # Return the monster's details
+        return jsonify(monster.to_dict())
+
+    if request.method == "PUT":
+        data = request.json
+        monster.name = data.get("name", monster.name)
+        monster.size = data.get("size", monster.size)
+        monster.type = data.get("type", monster.type)
+        monster.alignment = data.get("alignment", monster.alignment)
+        monster.hp = data.get("hp", monster.hp)
+        monster.ac = data.get("ac", monster.ac)
+        monster.speed = data.get("speed", monster.speed)
+        monster.stats = data.get("stats", monster.stats)
+        monster.actions = data.get("actions", monster.actions)
+        monster.legendary_actions = data.get("legendaryActions", monster.legendary_actions)
+        monster.traits = data.get("traits", monster.traits)
+        monster.reactions = data.get("reactions", monster.reactions)
+        monster.languages = data.get("languages", monster.languages)
+        monster.damage_vulnerabilities = data.get("damageVulnerabilities", monster.damage_vulnerabilities)
+        monster.senses = data.get("senses", monster.senses)
+        monster.cr = data.get("cr", monster.cr)
+        monster.exp = data.get("exp", monster.exp)
+        db.session.commit()
+        return jsonify(monster.to_dict())
+
+    if request.method == "DELETE":
+        db.session.delete(monster)
+        db.session.commit()
+        return jsonify({"message": "Monster deleted"})
+
+
 
 @monster_bp.route("/api/monsters/<int:monster_id>", methods=["PUT", "DELETE"])
 def modify_monster(monster_id):
