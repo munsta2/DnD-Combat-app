@@ -3,7 +3,10 @@
     <!-- Header -->
     <header class="header">
       <h1>Combat Tracking</h1>
-      <p>Manage combatants, track turns, apply damage, and dynamically manage combatants.</p>
+      <p>
+        Manage combatants, track turns, apply damage, and dynamically manage
+        combatants.
+      </p>
     </header>
 
     <div class="combat-ui">
@@ -82,20 +85,22 @@
           >
             <strong>{{ combatant.name }}</strong> - HP: {{ combatant.hp }}/
             {{ combatant.maxHp }}
-            | AC: {{ combatant.ac }} |
-            Initiative:
+            | AC: {{ combatant.ac }} | Initiative:
             <input
               type="number"
               v-model.number="combatant.initiative"
               @change="updateInitiative(index, combatant.initiative)"
-              style="width: 50px;"
+              style="width: 50px"
             />
           </li>
         </ul>
       </div>
 
       <!-- Apply Damage Section -->
-      <div class="apply-damage card" v-if="combatants.length > 0 && initiativesSet">
+      <div
+        class="apply-damage card"
+        v-if="combatants.length > 0 && initiativesSet"
+      >
         <h2>Apply Damage</h2>
         <label for="combatant-select">Select Combatant:</label>
         <select id="combatant-select" v-model="selectedCombatant">
@@ -118,7 +123,10 @@
       </div>
 
       <!-- Next Turn and End Combat Buttons -->
-      <div class="action-buttons card" v-if="combatants.length > 0 && initiativesSet">
+      <div
+        class="action-buttons card"
+        v-if="combatants.length > 0 && initiativesSet"
+      >
         <button @click="nextTurn">Next Turn</button>
         <button @click="endCombat" class="end-combat">End Combat</button>
       </div>
@@ -161,7 +169,7 @@ export default {
   },
   methods: {
     fetchEncounters() {
-      fetch("http://127.0.0.1:5000/api/encounters")
+      fetch(`${process.env.VUE_APP_API_URL}/api/encounters`)
         .then((response) => response.json())
         .then((data) => {
           this.encounters = data;
@@ -171,7 +179,7 @@ export default {
         });
     },
     fetchAvailableMonsters() {
-      fetch("http://127.0.0.1:5000/api/monsters")
+      fetch(`${process.env.VUE_APP_API_URL}/api/monsters`)
         .then((response) => response.json())
         .then((data) => {
           this.availableMonsters = data;
@@ -181,7 +189,7 @@ export default {
         });
     },
     loadEncounter() {
-      fetch("http://127.0.0.1:5000/api/combat/start", {
+      fetch(`${process.env.VUE_APP_API_URL}/api/combat/start`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -264,13 +272,6 @@ export default {
   },
 };
 </script>
-
-
-
-
-
-
-
 
 <style>
 .end-combat {
