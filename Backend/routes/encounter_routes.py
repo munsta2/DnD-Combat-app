@@ -37,23 +37,35 @@ def create_encounter():
 
 
 
-@encounter_bp.route("/api/encounters", methods=["GET"])
-def get_encounters(encounter_id):
+@encounter_bp.route('/api/encounters', methods=['GET'])
+def get_encounters():
     encounters = Encounter.query.all()
-    monsters_querry = Encounter.query.get_or_404(encounter_id);
-    monsters = [
+    return jsonify([
         {
-            'id': em.monster_id,
-            'alias': em.alias,
-            'count': em.count,
-            'name': Monster.query.get(em.monster_id).name
+            'id': encounter.id,
+            'name': encounter.name,
+            'monsters': [
+                {
+                    'id': em.monster.id,
+                    'name': em.monster.name,
+                    'hp': em.monster.hp,
+                    'ac': em.monster.ac,
+                    'dex': em.monster.dex,
+                    'alias': em.alias,
+                    'count': em.count
+                }
+                for em in encounter.encounter_monsters
+            ],
+            'players': [
+                {
+                    'id': ep.player.id,
+                    'name': ep.player.name,
+                    'ac': ep.player.ac,
+                    'alias': ep.alias,
+                    'count': ep.count
+                }
+                for ep in encounter.encounter_players
+            ]
         }
-        for em in encounter.monsters
-    ] 
-    return jsonify([{
-        "id": e.id,
-        "name": e.name,
-        "party_id": e.party_id,
-        "players": [{"id": p.player_id} for p in e.players],
-        "monsters": monsters,
-    } for e in encounters])
+        for encounter in encounters
+    ])

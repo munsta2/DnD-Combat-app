@@ -6,6 +6,7 @@ import ManagePlayers from "./components/ManagePlayers.vue";
 import ManageParties from "./components/ManageParties.vue";
 import ManageMonsters from "./components/ManageMonsters.vue";
 import ManageEncounters from "./components/ManageEncounters.vue";
+import CombatTracking from "./components/CombatTracking.vue";
 
 // Define your routes
 const routes = [
@@ -14,6 +15,7 @@ const routes = [
   { path: "/parties", component: ManageParties },
   { path: "/monsters", component: ManageMonsters },
   { path: "/encounters", component: ManageEncounters },
+  { path: "/combat", component: CombatTracking },
 ];
 
 // Create the router instance

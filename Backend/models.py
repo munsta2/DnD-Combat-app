@@ -6,6 +6,7 @@ db = SQLAlchemy()
 # Player model
 class Player(db.Model):
     __tablename__ = 'player'
+    
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     level = db.Column(db.Integer, nullable=False)
@@ -121,3 +122,11 @@ class Monster(db.Model):
             'reactions': self.reactions,
         }
     monster_encounters = db.relationship('EncounterMonster', back_populates='monster')
+
+
+class ActiveCombat(db.Model):
+    __tablename__ = 'active_combat'
+    id = db.Column(db.Integer, primary_key=True)
+    encounter_id = db.Column(db.Integer, db.ForeignKey('encounter.id'), nullable=False)
+    turn_order = db.Column(db.JSON, nullable=False)  # Stores combatants' order
+    active_turn_index = db.Column(db.Integer, default=0)

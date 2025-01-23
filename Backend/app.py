@@ -5,8 +5,8 @@ from flask_migrate import Migrate
 from routes.player_routes import player_bp
 from routes.party_routes import party_bp
 from routes.monster_routes import monster_bp
-from flask_migrate import Migrate
 from routes.encounter_routes import encounter_bp
+from routes.combat_routes import combat_bp
 import git
 app = Flask(__name__)
 CORS(app)
@@ -25,7 +25,7 @@ app.register_blueprint(player_bp)
 app.register_blueprint(party_bp)
 app.register_blueprint(monster_bp)
 app.register_blueprint(encounter_bp)
-
+app.register_blueprint(combat_bp)
 
 
 with app.app_context():
