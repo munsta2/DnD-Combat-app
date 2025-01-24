@@ -91,7 +91,10 @@
           <li
             v-for="(combatant, index) in combatants"
             :key="combatant.id"
-            :class="{ active: index === currentTurnIndex }"
+            :class="[
+              { active: index === currentTurnIndex },
+              { dead: combatant.hp === 0 },
+            ]"
           >
             <input
               type="text"
@@ -617,5 +620,21 @@ export default {
 
 .home-button:hover {
   background-color: #0056b3;
+}
+
+.styled-list li.dead {
+  background-color: rgba(
+    255,
+    0,
+    0,
+    0.5
+  ); /* Red background for dead combatants */
+  color: #fff; /* White text for better contrast */
+  font-weight: bold;
+  text-decoration: line-through; /* Optional: visually strike through their name */
+}
+
+.styled-list li.dead input {
+  text-decoration: line-through; /* Strike through input text if you want */
 }
 </style>

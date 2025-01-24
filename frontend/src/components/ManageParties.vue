@@ -177,7 +177,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .manage-parties-page {
   display: flex;
   flex-direction: column;

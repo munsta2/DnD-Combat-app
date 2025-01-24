@@ -85,7 +85,7 @@
   </div>
 </template>
 
-<script>
+<script scoped>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
