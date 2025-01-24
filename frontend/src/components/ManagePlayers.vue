@@ -1,67 +1,87 @@
 <template>
   <div class="manage-players">
-    <h1>Manage Players</h1>
+    <header class="hero">
+      <h1>Manage Players</h1>
+      <p>Add, update, and manage players for your adventures.</p>
+      <router-link to="/" class="home-button">Home</router-link>
+    </header>
 
-    <form class="player-form" @submit.prevent="addOrUpdatePlayer">
-      <div class="form-row">
-        <label for="name">Player Name</label>
-        <input
-          id="name"
-          v-model="newPlayer.name"
-          placeholder="Player Name"
-          required
-        />
+    <div class="content">
+      <!-- Player Form -->
+      <div class="player-form section">
+        <h3>{{ editMode ? "Update Player" : "Add Player" }}</h3>
+        <form @submit.prevent="addOrUpdatePlayer">
+          <div class="form-row">
+            <label for="name">Player Name</label>
+            <input
+              id="name"
+              v-model="newPlayer.name"
+              placeholder="Enter player name"
+              required
+            />
+          </div>
+          <div class="form-row">
+            <label for="level">Level</label>
+            <input
+              id="level"
+              v-model.number="newPlayer.level"
+              type="number"
+              min="1"
+              max="20"
+              placeholder="Enter level"
+              required
+            />
+          </div>
+          <div class="form-row">
+            <label for="ac">Armor Class</label>
+            <input
+              id="ac"
+              v-model.number="newPlayer.ac"
+              type="number"
+              min="1"
+              placeholder="Enter AC"
+              required
+            />
+          </div>
+          <div class="form-row">
+            <label for="initiativeModifier">Initiative Modifier</label>
+            <input
+              id="initiativeModifier"
+              v-model.number="newPlayer.initiativeModifier"
+              type="number"
+              placeholder="Enter initiative modifier"
+              required
+            />
+          </div>
+          <button type="submit">
+            {{ editMode ? "Update Player" : "Add Player" }}
+          </button>
+        </form>
       </div>
-      <div class="form-row">
-        <label for="level">Level</label>
-        <input
-          id="level"
-          v-model.number="newPlayer.level"
-          type="number"
-          placeholder="Level"
-          required
-        />
-      </div>
-      <div class="form-row">
-        <label for="ac">Armor Class</label>
-        <input
-          id="ac"
-          v-model.number="newPlayer.ac"
-          type="number"
-          placeholder="Armor Class"
-          required
-        />
-      </div>
-      <div class="form-row">
-        <label for="initiativeModifier">Initiative Modifier</label>
-        <input
-          id="initiativeModifier"
-          v-model.number="newPlayer.initiativeModifier"
-          type="number"
-          placeholder="Initiative Modifier"
-          required
-        />
-      </div>
-      <button type="submit">
-        {{ editMode ? "Update Player" : "Add Player" }}
-      </button>
-    </form>
 
-    <div class="player-list">
-      <h2>Current Players</h2>
-      <ul>
-        <li v-for="player in players" :key="player.id">
-          <span>{{ player.name }}</span>
-          <span>Level: {{ player.level }}</span>
-          <span>AC: {{ player.ac }}</span>
-          <span>Initiative: {{ player.initiativeModifier }}</span>
-          <button @click="editPlayer(player)">Edit</button>
-          <button @click="removePlayer(player.id)">Delete</button>
-        </li>
-      </ul>
+      <!-- Player List -->
+      <div class="player-list section">
+        <h3>Current Players</h3>
+        <ul class="styled-list">
+          <li v-for="player in players" :key="player.id">
+            <div class="player-info">
+              <span><strong>Name:</strong> {{ player.name }}</span>
+              <span><strong>Level:</strong> {{ player.level }}</span>
+              <span><strong>AC:</strong> {{ player.ac }}</span>
+              <span>
+                <strong>Initiative:</strong> {{ player.initiativeModifier }}
+              </span>
+            </div>
+            <div class="player-actions">
+              <button @click="editPlayer(player)">Edit</button>
+              <button class="delete-button" @click="removePlayer(player.id)">
+                Delete
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
-
-    <button class="home-button" @click="goHome">Go to Home</button>
   </div>
 </template>
 
@@ -147,10 +167,6 @@ export default {
       }
     };
 
-    const goHome = () => {
-      router.push("/");
-    };
-
     onMounted(fetchPlayers);
 
     return {
@@ -160,7 +176,7 @@ export default {
       addOrUpdatePlayer,
       editPlayer,
       removePlayer,
-      goHome,
+      router,
     };
   },
 };
@@ -168,86 +184,75 @@ export default {
 
 <style>
 .manage-players {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "Georgia", serif;
+  background: url("@/assets/fantasy-3756975_1280.jpg") no-repeat center center
+    fixed;
+  background-size: cover;
+  min-height: 100vh;
+  color: #fff;
   padding: 20px;
 }
 
-.player-form {
-  margin-bottom: 20px;
-  border: 1px solid #ccc;
-  padding: 15px;
-  border-radius: 5px;
-  background: #f9f9f9;
-}
-
-.form-row {
+.content {
   display: flex;
-  flex-direction: column;
-  margin-bottom: 10px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+  gap: 20px;
 }
 
-label {
-  font-weight: bold;
-  margin-bottom: 5px;
+.section {
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+  flex: 1 1 45%;
 }
 
-input {
-  padding: 8px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.styled-list {
+  list-style: none;
+  padding: 0;
+}
+
+.styled-list li {
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.player-info span {
+  display: block;
+}
+
+.player-actions button {
+  margin-right: 10px;
 }
 
 button {
   padding: 10px 15px;
-  font-size: 16px;
+  font-size: 14px;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-left: 5px;
 }
 
 button:hover {
   background-color: #0056b3;
 }
 
-.player-list {
-  margin-top: 20px;
+.delete-button {
+  background-color: #dc3545;
 }
 
-.player-list h2 {
-  margin-bottom: 10px;
-}
-
-.player-list ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.player-list li {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px;
-  border-bottom: 1px solid #ccc;
-}
-
-.player-list li span {
-  margin-right: 15px;
-}
-
-.home-button {
-  margin-top: 20px;
-  padding: 10px 15px;
-  font-size: 16px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.home-button:hover {
-  background-color: #218838;
+.delete-button:hover {
+  background-color: #b02a37;
 }
 </style>
