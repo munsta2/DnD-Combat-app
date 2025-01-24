@@ -221,7 +221,7 @@ export default {
     fetchStatBlock(combatant) {
       console.log("I am being called");
       if (combatant.type === "monster") {
-        fetch(`${process.env.VUE_APP_API_URL}/api/monsters/${combatant.id}`)
+        fetch(`${process.env.VUE_APP_API_URL}/api/monsters/${combatant.dbId}`)
           .then((response) => response.json())
           .then((data) => {
             this.statBlock = data;
@@ -276,11 +276,13 @@ export default {
           let monsterCount = 0; // Counter to assign unique numbers to monsters
 
           // Assign displayName and count existing monsters
-          this.combatants = data.turn_order.map((combatant) => {
+          this.combatants = data.turn_order.map((combatant, index) => {
             if (combatant.type === "monster") {
               monsterCount += 1; // Increment monster count
               return {
                 ...combatant,
+                id: `${combatant.id}-${index}`, // Unique frontend ID
+                dbId: combatant.id, // Set dbId to the monster's database id
                 displayName: `${combatant.name} ${monsterCount}`,
                 initiative: combatant.initiative || 0,
               };
@@ -288,6 +290,7 @@ export default {
               // Players keep their original name
               return {
                 ...combatant,
+                id: `player-${index}`,
                 displayName: combatant.name,
                 initiative: 0,
               };
@@ -329,7 +332,9 @@ export default {
       if (this.selectedMonster) {
         this.monsterCounter += 1; // Increment the monster counter
         const newMonster = {
-          id: `${this.selectedMonster.id}-${Date.now()}`,
+          // id: `${this.selectedMonster.id}`,
+          id: `${this.selectedMonster.id}-${Date.now()}`, //front end id
+          dbId: this.selectedMonster.id, // backend id
           name: this.selectedMonster.name,
           type: "monster",
           hp: this.selectedMonster.hp,
@@ -355,6 +360,7 @@ export default {
       const combatant = this.combatants.find(
         (c) => c.id === this.selectedCombatant
       );
+      console.log("this is who I am doing damage to,", combatant.name);
       if (combatant) {
         combatant.hp = Math.max(0, combatant.hp - this.damageAmount);
       }
@@ -389,12 +395,14 @@ export default {
   },
   watch: {
     activeCombatant: {
-      immediate: true,
-      handler(newCombatant) {
-        if (newCombatant) {
-          this.fetchStatBlock(newCombatant);
+      handler(newValue) {
+        if (newValue && newValue.type === "monster") {
+          this.fetchStatBlock(newValue);
+        } else {
+          this.statBlock = null; // Clear the stat block for non-monster turns
         }
       },
+      immediate: true, // Run immediately on component load
     },
   },
   mounted() {
