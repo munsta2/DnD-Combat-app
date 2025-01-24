@@ -235,71 +235,84 @@
             {{ monster.name }}
           </li>
         </ul>
-        <div v-if="selectedMonster" class="monster-details">
-          <div class="statblock">
-            <!-- Monster Name -->
-            <h2>{{ selectedMonster.name }}</h2>
-            <p class="subtitle">
-              {{ selectedMonster.size }} {{ selectedMonster.type }},
-              {{ selectedMonster.alignment }}
+        <div class="stat-block section" v-if="selectedMonster">
+          <h3>{{ selectedMonster.name }}</h3>
+          <p>
+            {{ selectedMonster.size }} {{ selectedMonster.type }},
+            {{ selectedMonster.alignment }}
+          </p>
+          <p><strong>Armor Class:</strong> {{ selectedMonster.ac }}</p>
+          <p><strong>Hit Points:</strong> {{ selectedMonster.hp }}</p>
+          <p><strong>Speed:</strong> {{ selectedMonster.speed }}</p>
+
+          <div class="abilities">
+            <p>
+              <strong>STR:</strong> {{ selectedMonster.stats.str }} ({{
+                formatModifier(selectedMonster.stats.str)
+              }})
             </p>
+            <p>
+              <strong>DEX:</strong> {{ selectedMonster.stats.dex }} ({{
+                formatModifier(selectedMonster.stats.dex)
+              }})
+            </p>
+            <p>
+              <strong>CON:</strong> {{ selectedMonster.stats.con }} ({{
+                formatModifier(selectedMonster.stats.con)
+              }})
+            </p>
+            <p>
+              <strong>INT:</strong> {{ selectedMonster.stats.int }} ({{
+                formatModifier(selectedMonster.stats.int)
+              }})
+            </p>
+            <p>
+              <strong>WIS:</strong> {{ selectedMonster.stats.wis }} ({{
+                formatModifier(selectedMonster.stats.wis)
+              }})
+            </p>
+            <p>
+              <strong>CHA:</strong> {{ selectedMonster.stats.cha }} ({{
+                formatModifier(selectedMonster.stats.cha)
+              }})
+            </p>
+          </div>
 
-            <!-- Armor Class, Hit Points, Speed -->
-            <div class="statblock-header">
-              <p><strong>Armor Class:</strong> {{ selectedMonster.ac }}</p>
-              <p><strong>Hit Points:</strong> {{ selectedMonster.hp }}</p>
-              <p><strong>Speed:</strong> {{ selectedMonster.speed }}</p>
-            </div>
+          <div class="divider"></div>
 
-            <!-- Stats -->
-            <div class="stats">
-              <p><strong>STR:</strong> {{ selectedMonster.stats.str }}</p>
-              <p><strong>DEX:</strong> {{ selectedMonster.stats.dex }}</p>
-              <p><strong>CON:</strong> {{ selectedMonster.stats.con }}</p>
-              <p><strong>INT:</strong> {{ selectedMonster.stats.int }}</p>
-              <p><strong>WIS:</strong> {{ selectedMonster.stats.wis }}</p>
-              <p><strong>CHA:</strong> {{ selectedMonster.stats.cha }}</p>
-            </div>
+          <div class="details">
+            <p>
+              <strong>Damage Vulnerabilities:</strong>
+              {{ selectedMonster.damageVulnerabilities || "None" }}
+            </p>
+            <p><strong>Senses:</strong> {{ selectedMonster.senses }}</p>
+            <p><strong>Languages:</strong> {{ selectedMonster.languages }}</p>
+            <p>
+              <strong>Challenge:</strong> {{ selectedMonster.cr }} ({{
+                selectedMonster.exp
+              }}
+              XP)
+            </p>
+          </div>
 
-            <!-- Details -->
-            <div class="details">
-              <p>
-                <strong>Damage Vulnerabilities:</strong>
-                {{ selectedMonster.damageVulnerabilities || "None" }}
-              </p>
-              <p><strong>Senses:</strong> {{ selectedMonster.senses }}</p>
-              <p><strong>Languages:</strong> {{ selectedMonster.languages }}</p>
-              <p>
-                <strong>Challenge:</strong> {{ selectedMonster.cr }} ({{
-                  selectedMonster.exp
-                }}
-                XP)
-              </p>
-            </div>
+          <div v-if="selectedMonster.actions" class="actions">
+            <h4>Actions</h4>
+            <div v-html="selectedMonster.actions"></div>
+          </div>
 
-            <!-- Actions -->
-            <div class="abilities">
-              <h3>Actions</h3>
-              <div v-html="selectedMonster.actions"></div>
-            </div>
+          <div v-if="selectedMonster.legendaryActions" class="actions">
+            <h4>Legendary Actions</h4>
+            <div v-html="selectedMonster.legendaryActions"></div>
+          </div>
 
-            <!-- Legendary Actions -->
-            <div class="abilities" v-if="selectedMonster.legendaryActions">
-              <h3>Legendary Actions</h3>
-              <div v-html="selectedMonster.legendaryActions"></div>
-            </div>
+          <div v-if="selectedMonster.traits" class="actions">
+            <h4>Traits</h4>
+            <div v-html="selectedMonster.traits"></div>
+          </div>
 
-            <!-- Traits -->
-            <div class="abilities" v-if="selectedMonster.traits">
-              <h3>Traits</h3>
-              <div v-html="selectedMonster.traits"></div>
-            </div>
-
-            <!-- Reactions -->
-            <div class="abilities" v-if="selectedMonster.reactions">
-              <h3>Reactions</h3>
-              <div v-html="selectedMonster.reactions"></div>
-            </div>
+          <div v-if="selectedMonster.reactions" class="actions">
+            <h4>Reactions</h4>
+            <div v-html="selectedMonster.reactions"></div>
           </div>
         </div>
       </div>
@@ -413,7 +426,10 @@ export default {
     const startEdit = (monster) => {
       alert(`Edit functionality is not implemented yet for ${monster.name}`);
     };
-
+    const formatModifier = (stat) => {
+      const modifier = Math.floor((stat - 10) / 2);
+      return modifier > 0 ? `+${modifier}` : modifier.toString();
+    };
     onMounted(() => {
       fetchMonsters();
     });
@@ -429,6 +445,7 @@ export default {
       selectMonster,
       startEdit,
       goHome,
+      formatModifier,
     };
   },
 };
@@ -568,7 +585,7 @@ export default {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
-.statblock {
+.selectedMonster {
   font-family: "Georgia", serif;
   background-color: #fdf5e6;
   border: 2px solid #8b4513;
@@ -581,7 +598,7 @@ export default {
   position: relative;
 }
 
-.statblock h2 {
+.selectedMonster h2 {
   font-size: 1.8em;
   margin: 0;
   text-align: center;
@@ -590,14 +607,14 @@ export default {
   padding-bottom: 10px;
 }
 
-.statblock .subtitle {
+.selectedMonster .subtitle {
   text-align: center;
   font-style: italic;
   color: #555;
   margin-bottom: 10px;
 }
 
-.statblock-header,
+.selectedMonster-header,
 .stats,
 .details,
 .abilities {
@@ -606,7 +623,7 @@ export default {
   margin-top: 10px;
 }
 
-.statblock-header {
+.selectedMonster-header {
   display: flex;
   justify-content: space-between;
   font-size: 1em;

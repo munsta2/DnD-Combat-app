@@ -6,6 +6,7 @@
         Manage combatants, track turns, apply damage, and dynamically manage
         combatants.
       </p>
+      <router-link to="/" class="home-button">Home</router-link>
     </header>
 
     <div class="content">
@@ -145,33 +146,33 @@
 
         <div class="abilities">
           <p>
-            <strong>STR:</strong> {{ statBlock.stats.str }} ({{
-              Math.floor((statBlock.stats.str - 10) / 2)
+            <strong>STR:</strong> {{ statBlock.stats.str }} <br />({{
+              formatModifier(statBlock.stats.str)
             }})
           </p>
           <p>
-            <strong>DEX:</strong> {{ statBlock.stats.dex }} ({{
-              Math.floor((statBlock.stats.dex - 10) / 2)
+            <strong>DEX:</strong> {{ statBlock.stats.dex }} <br />({{
+              formatModifier(statBlock.stats.dex)
             }})
           </p>
           <p>
-            <strong>CON:</strong> {{ statBlock.stats.con }} ({{
-              Math.floor((statBlock.stats.con - 10) / 2)
+            <strong>CON:</strong> {{ statBlock.stats.con }} <br />({{
+              formatModifier(statBlock.stats.con)
             }})
           </p>
           <p>
-            <strong>INT:</strong> {{ statBlock.stats.int }} ({{
-              Math.floor((statBlock.stats.int - 10) / 2)
+            <strong>INT:</strong> {{ statBlock.stats.int }} <br />({{
+              formatModifier(statBlock.stats.int)
             }})
           </p>
           <p>
-            <strong>WIS:</strong> {{ statBlock.stats.wis }} ({{
-              Math.floor((statBlock.stats.wis - 10) / 2)
+            <strong>WIS:</strong> {{ statBlock.stats.wis }} <br />({{
+              formatModifier(statBlock.stats.wis)
             }})
           </p>
           <p>
-            <strong>CHA:</strong> {{ statBlock.stats.cha }} ({{
-              Math.floor((statBlock.stats.cha - 10) / 2)
+            <strong>CHA:</strong> {{ statBlock.stats.cha }} <br />({{
+              formatModifier(statBlock.stats.cha)
             }})
           </p>
         </div>
@@ -242,6 +243,10 @@ export default {
     },
   },
   methods: {
+    formatModifier(stat) {
+      const modifier = Math.floor((stat - 10) / 2);
+      return modifier > 0 ? `+${modifier}` : modifier.toString();
+    },
     fetchStatBlock(combatant) {
       console.log("I am being called");
       if (combatant.type === "monster") {
@@ -303,6 +308,7 @@ export default {
           this.combatants = data.turn_order.map((combatant, index) => {
             if (combatant.type === "monster") {
               monsterCount += 1; // Increment monster count
+              console.log(combatant);
               return {
                 ...combatant,
                 id: `${combatant.id}-${index}`, // Unique frontend ID
@@ -394,6 +400,7 @@ export default {
         (this.currentTurnIndex + 1) % this.combatants.length;
       this.fetchStatBlock(this.activeCombatant); // Update stat block on turn change
     },
+
     endCombat() {
       this.selectedEncounter = null;
       this.selectedMonster = null;
@@ -593,5 +600,22 @@ export default {
 .stat-block strong {
   font-weight: bold;
   color: #7a4214;
+}
+.home-button {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 15px;
+  background-color: #00ff9d;
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.home-button:hover {
+  background-color: #0056b3;
 }
 </style>

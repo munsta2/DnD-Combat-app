@@ -3,6 +3,7 @@
     <header class="hero">
       <h1>Encounter Builder</h1>
       <p>Create, customize, and save your encounters for epic battles!</p>
+      <router-link to="/" class="home-button">Home</router-link>
     </header>
 
     <div class="content">
