@@ -37,7 +37,7 @@ party_player = db.Table('party_player',
 
 class EncounterMonster(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    encounter_id = db.Column(db.Integer, db.ForeignKey('encounter.id'))
+    encounter_id = db.Column(db.Integer, db.ForeignKey('encounter.id',ondelete="CASCADE"))
     monster_id = db.Column(db.Integer, db.ForeignKey('monster.id'))
     alias = db.Column(db.String(100))  # Alias for the monster
     count = db.Column(db.Integer, default=1)  # Number of this monster
@@ -57,7 +57,7 @@ class EncounterPlayer(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     encounter_id = db.Column(db.Integer, db.ForeignKey('encounter.id'))
-    player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
+    player_id = db.Column(db.Integer, db.ForeignKey('player.id',ondelete="CASCADE"))
     alias = db.Column(db.String(100))
     count = db.Column(db.Integer, default=1)
 

@@ -125,10 +125,26 @@ export default {
     };
 
     const removePlayer = async (id) => {
-      await fetch(`${process.env.VUE_APP_API_URL}/api/players/${id}`, {
-        method: "DELETE",
-      });
-      players.value = players.value.filter((p) => p.id !== id);
+      try {
+        const response = await fetch(
+          `${process.env.VUE_APP_API_URL}/api/players/${id}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (response.ok) {
+          players.value = players.value.filter((p) => p.id !== id);
+          alert("Player deleted and removed from any associated encounters.");
+        } else {
+          const error = await response.json();
+          console.error("Error deleting player:", error);
+          alert(`Failed to delete player: ${error.error || "Unknown error"}`);
+        }
+      } catch (error) {
+        console.error("Error deleting player:", error);
+        alert("An error occurred while deleting the player.");
+      }
     };
 
     const goHome = () => {

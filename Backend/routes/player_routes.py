@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from models import Player, db
+from models import Player, db, EncounterPlayer
 
 player_bp = Blueprint('players', __name__)
 
@@ -36,6 +36,9 @@ def manage_players():
 def get_parties():
     parties = Party.query.all()
     return jsonify([{"id": p.id, "name": p.name} for p in parties])
+def get_encounterPlayers():
+    EncounterPlayers = EncounterPlayer.query.all()
+
 
 @player_bp.route("/api/players/<int:player_id>", methods=["PUT", "DELETE"])
 def modify_player(player_id):
@@ -59,8 +62,16 @@ def modify_player(player_id):
         })
 
     if request.method == "DELETE":
-        db.session.delete(player)
-        db.session.commit()
-        return jsonify({"message": "Player deleted"})
+        try:
+            # Remove player from any associated encounters
+            EncounterPlayer.query.filter_by(player_id=player_id).delete()
+
+            # Delete the player
+            db.session.delete(player)
+            db.session.commit()
+            return jsonify({"message": "Player and associated encounter links deleted successfully"})
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": str(e)}), 500
 
 

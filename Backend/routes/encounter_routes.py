@@ -32,6 +32,19 @@ def create_encounter():
     db.session.commit()
     return jsonify({'message': 'Encounter created successfully', 'encounter_id': new_encounter.id}), 201
 
+@encounter_bp.route("/api/encounters/<int:encounter_id>", methods=["DELETE"])
+def delete_encounter(encounter_id):
+    encounter = Encounter.query.get(encounter_id)
+    if not encounter:
+        return jsonify({"error": "Encounter not found"}), 404
+
+    # Deleting the encounter will also delete associated players and monsters
+    try:
+        db.session.delete(encounter)
+        db.session.commit()
+        return jsonify({"message": "Encounter and its associated data deleted successfully!"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 

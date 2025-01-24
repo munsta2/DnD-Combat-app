@@ -160,6 +160,20 @@
           <p>{{ encounterDifficulty }}</p>
         </div>
         <button @click="saveEncounter">Save Encounter</button>
+        <div class="encounter-management section">
+          <h3>Existing Encounters</h3>
+          <ul class="styled-list">
+            <li v-for="encounter in encounters" :key="encounter.id">
+              <span>{{ encounter.name }}</span>
+              <button
+                @click="deleteEncounter(encounter.id)"
+                class="delete-button"
+              >
+                Delete
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
 
       <!-- Monster Selection -->
@@ -189,6 +203,7 @@
 export default {
   data() {
     return {
+      encounters: [],
       parties: [],
       players: [],
       monsters: [],
@@ -265,6 +280,50 @@ export default {
     },
   },
   methods: {
+    async fetchEncounters() {
+      try {
+        const response = await fetch(
+          `${process.env.VUE_APP_API_URL}/api/encounters`
+        );
+        if (response.ok) {
+          this.encounters = await response.json();
+        } else {
+          console.error("Failed to fetch encounters.");
+        }
+      } catch (error) {
+        console.error("Error fetching encounters:", error);
+      }
+    },
+
+    async deleteEncounter(encounterId) {
+      const confirmed = confirm(
+        "Are you sure you want to delete this encounter?"
+      );
+      if (!confirmed) return;
+
+      try {
+        const response = await fetch(
+          `${process.env.VUE_APP_API_URL}/api/encounters/${encounterId}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (response.ok) {
+          alert("Encounter deleted successfully!");
+          // Optionally remove the encounter from the UI (if you're listing encounters here)
+          this.encounters = this.encounters.filter(
+            (encounter) => encounter.id !== encounterId
+          );
+        } else {
+          alert("Failed to delete the encounter.");
+        }
+      } catch (error) {
+        console.error("Error deleting encounter:", error);
+        alert("An error occurred while deleting the encounter.");
+      }
+    },
+
     async fetchData() {
       const partyResponse = await fetch(
         `${process.env.VUE_APP_API_URL}/api/parties`
@@ -363,6 +422,7 @@ export default {
       );
       if (response.ok) {
         alert("Encounter saved successfully!");
+        await this.fetchEncounters();
       } else {
         alert("Failed to save encounter.");
       }
@@ -370,6 +430,7 @@ export default {
   },
   mounted() {
     this.fetchData();
+    this.fetchEncounters();
   },
 };
 </script>
