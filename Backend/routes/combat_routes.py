@@ -41,9 +41,7 @@ def start_combat():
             'initiative': 0
         })
 
-    # Randomize initiative
-    for c in combatants:
-        c['initiative'] = randint(1, 20)
+    
 
     # Sort combatants by initiative in descending order
     combatants.sort(key=lambda x: x['initiative'], reverse=True)
