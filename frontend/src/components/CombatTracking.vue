@@ -144,12 +144,36 @@
         <p><strong>Speed:</strong> {{ statBlock.speed }}</p>
 
         <div class="abilities">
-          <p><strong>STR:</strong> {{ statBlock.stats.str }}</p>
-          <p><strong>DEX:</strong> {{ statBlock.stats.dex }}</p>
-          <p><strong>CON:</strong> {{ statBlock.stats.con }}</p>
-          <p><strong>INT:</strong> {{ statBlock.stats.int }}</p>
-          <p><strong>WIS:</strong> {{ statBlock.stats.wis }}</p>
-          <p><strong>CHA:</strong> {{ statBlock.stats.cha }}</p>
+          <p>
+            <strong>STR:</strong> {{ statBlock.stats.str }} ({{
+              Math.floor((statBlock.stats.str - 10) / 2)
+            }})
+          </p>
+          <p>
+            <strong>DEX:</strong> {{ statBlock.stats.dex }} ({{
+              Math.floor((statBlock.stats.dex - 10) / 2)
+            }})
+          </p>
+          <p>
+            <strong>CON:</strong> {{ statBlock.stats.con }} ({{
+              Math.floor((statBlock.stats.con - 10) / 2)
+            }})
+          </p>
+          <p>
+            <strong>INT:</strong> {{ statBlock.stats.int }} ({{
+              Math.floor((statBlock.stats.int - 10) / 2)
+            }})
+          </p>
+          <p>
+            <strong>WIS:</strong> {{ statBlock.stats.wis }} ({{
+              Math.floor((statBlock.stats.wis - 10) / 2)
+            }})
+          </p>
+          <p>
+            <strong>CHA:</strong> {{ statBlock.stats.cha }} ({{
+              Math.floor((statBlock.stats.cha - 10) / 2)
+            }})
+          </p>
         </div>
 
         <div class="divider"></div>
