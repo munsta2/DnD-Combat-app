@@ -235,6 +235,13 @@
             {{ monster.name }}
           </li>
         </ul>
+        <button
+          v-if="selectedMonster"
+          @click="deleteMonster(selectedMonster.id)"
+          class="delete-button"
+        >
+          Delete Monster
+        </button>
         <div class="stat-block section" v-if="selectedMonster">
           <h3>{{ selectedMonster.name }}</h3>
           <p>
@@ -687,5 +694,28 @@ button {
 
 button:hover {
   background-color: #0056b3;
+}
+
+.delete-button {
+  background-color: #ff4d4d; /* Bright red for delete */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.delete-button:hover {
+  background-color: #e63939; /* Darker red on hover */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Slightly more shadow on hover */
+}
+
+.delete-button:active {
+  background-color: #cc3232; /* Even darker red on click */
+  transform: scale(0.98); /* Slightly smaller on click for feedback */
 }
 </style>

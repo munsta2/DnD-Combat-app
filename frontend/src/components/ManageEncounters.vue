@@ -34,7 +34,9 @@
         </ul>
 
         <!-- Monster Statblock -->
-        <div class="monster-statblock" v-if="selectedMonster">
+
+        <div class="stat-block section" v-if="selectedMonster">
+          <button @click="addMonsterToEncounter">Add Monster</button>
           <h3>{{ selectedMonster.name }}</h3>
           <p>
             {{ selectedMonster.size }} {{ selectedMonster.type }},
@@ -43,16 +45,76 @@
           <p><strong>Armor Class:</strong> {{ selectedMonster.ac }}</p>
           <p><strong>Hit Points:</strong> {{ selectedMonster.hp }}</p>
           <p><strong>Speed:</strong> {{ selectedMonster.speed }}</p>
-          <h4>Abilities</h4>
-          <p><strong>STR:</strong> {{ selectedMonster.stats?.str || "N/A" }}</p>
-          <p><strong>DEX:</strong> {{ selectedMonster.stats?.dex || "N/A" }}</p>
-          <p><strong>CON:</strong> {{ selectedMonster.stats?.con || "N/A" }}</p>
-          <p><strong>INT:</strong> {{ selectedMonster.stats?.int || "N/A" }}</p>
-          <p><strong>WIS:</strong> {{ selectedMonster.stats?.wis || "N/A" }}</p>
-          <p><strong>CHA:</strong> {{ selectedMonster.stats?.cha || "N/A" }}</p>
-          <h4>Actions</h4>
-          <div v-html="selectedMonster.actions"></div>
-          <button @click="addMonsterToEncounter">Add Monster</button>
+
+          <div class="abilities">
+            <p>
+              <strong>STR:</strong> {{ selectedMonster.stats.str }} ({{
+                formatModifier(selectedMonster.stats.str)
+              }})
+            </p>
+            <p>
+              <strong>DEX:</strong> {{ selectedMonster.stats.dex }} ({{
+                formatModifier(selectedMonster.stats.dex)
+              }})
+            </p>
+            <p>
+              <strong>CON:</strong> {{ selectedMonster.stats.con }} ({{
+                formatModifier(selectedMonster.stats.con)
+              }})
+            </p>
+            <p>
+              <strong>INT:</strong> {{ selectedMonster.stats.int }} ({{
+                formatModifier(selectedMonster.stats.int)
+              }})
+            </p>
+            <p>
+              <strong>WIS:</strong> {{ selectedMonster.stats.wis }} ({{
+                formatModifier(selectedMonster.stats.wis)
+              }})
+            </p>
+            <p>
+              <strong>CHA:</strong> {{ selectedMonster.stats.cha }} ({{
+                formatModifier(selectedMonster.stats.cha)
+              }})
+            </p>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="details">
+            <p>
+              <strong>Damage Vulnerabilities:</strong>
+              {{ selectedMonster.damageVulnerabilities || "None" }}
+            </p>
+            <p><strong>Senses:</strong> {{ selectedMonster.senses }}</p>
+            <p><strong>Languages:</strong> {{ selectedMonster.languages }}</p>
+            <p>
+              <strong>Challenge:</strong> {{ selectedMonster.cr }} ({{
+                selectedMonster.exp
+              }}
+              XP)
+            </p>
+          </div>
+
+          <div v-if="selectedMonster.actions" class="actions">
+            <h4>Actions</h4>
+            <div v-html="selectedMonster.actions"></div>
+          </div>
+
+          <div v-if="selectedMonster.legendaryActions" class="actions">
+            <h4>Legendary Actions</h4>
+            <div v-html="selectedMonster.legendaryActions"></div>
+          </div>
+
+          <div v-if="selectedMonster.traits" class="actions">
+            <h4>Traits</h4>
+            <div v-html="selectedMonster.traits"></div>
+          </div>
+
+          <div v-if="selectedMonster.reactions" class="actions">
+            <h4>Reactions</h4>
+            <div v-html="selectedMonster.reactions"></div>
+          </div>
         </div>
       </div>
 
@@ -203,6 +265,10 @@ export default {
         `${process.env.VUE_APP_API_URL}/api/monsters`
       );
       this.monsters = await monsterResponse.json();
+    },
+    formatModifier(stat) {
+      const modifier = Math.floor((stat - 10) / 2);
+      return modifier > 0 ? `+${modifier}` : modifier.toString();
     },
     selectParty(party) {
       if (this.selectedParty?.id === party.id) {
