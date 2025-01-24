@@ -21,7 +21,7 @@ def manage_parties():
             "id": new_party.id,
             "name": new_party.name,
             "players": [
-                {"id": player.id, "name": player.name} for player in new_party.players
+                {"id": player.id, "name": player.name, "level": player.level} for player in new_party.players
             ]
         }), 201
 
@@ -31,7 +31,7 @@ def manage_parties():
             "id": party.id,
             "name": party.name,
             "players": [
-                {"id": player.id, "name": player.name} for player in party.players
+                {"id": player.id, "name": player.name, "level": player.level} for player in party.players
             ]
         } for party in parties
     ])

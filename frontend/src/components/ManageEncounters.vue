@@ -219,6 +219,7 @@ export default {
       let partyThresholds = { easy: 0, medium: 0, hard: 0, deadly: 0 };
       this.selectedPlayers.forEach((player) => {
         const level = player.level;
+        // // console.log("Processing Player:", player);
         if (xpThresholds[level]) {
           partyThresholds.easy += xpThresholds[level].easy;
           partyThresholds.medium += xpThresholds[level].medium;
@@ -226,12 +227,13 @@ export default {
           partyThresholds.deadly += xpThresholds[level].deadly;
         }
       });
-
+      // console.log("party: ", partyThresholds);
+      // console.log(this.encounter.monsters);
       const totalMonsterXP = this.encounter.monsters.reduce(
-        (sum, monster) => sum + (monster.challengeRating || 0) * 100,
+        (sum, monster) => sum + monster.exp,
         0
       );
-
+      // console.log("monsters: ", totalMonsterXP);
       const monsterCount = this.encounter.monsters.length;
       let multiplier = 1;
       if (monsterCount === 2) multiplier = 1.5;
@@ -241,6 +243,19 @@ export default {
       else if (monsterCount >= 15) multiplier = 4;
 
       const adjustedXP = totalMonsterXP * multiplier;
+      // console.log("audjetedxp: ", adjustedXP);
+      // for (let difficulty in partyThresholds) {
+      //   console.log(`${difficulty}: ${partyThresholds[difficulty]}`);
+      // }
+
+      if (
+        adjustedXP == 0 ||
+        (partyThresholds.deadly == 0 &&
+          partyThresholds.hard == 0 &&
+          partyThresholds.medium == 0 &&
+          partyThresholds.easy == 0)
+      )
+        return "n/a";
 
       if (adjustedXP >= partyThresholds.deadly) return "Deadly";
       if (adjustedXP >= partyThresholds.hard) return "Hard";
@@ -271,17 +286,20 @@ export default {
       return modifier > 0 ? `+${modifier}` : modifier.toString();
     },
     selectParty(party) {
+      // console.log("Selected Party:", party);
       if (this.selectedParty?.id === party.id) {
+        // Deselect the party
         this.selectedParty = null;
         const partyPlayerIds = party.players.map((player) => player.id);
         this.selectedPlayers = this.selectedPlayers.filter(
           (player) => !partyPlayerIds.includes(player.id)
         );
         this.encounter.party_id = null;
-        this.encounter.player_ids = this.selectedPlayers.map(
-          (player) => player.id
-        );
+        this.encounter.player_ids = [
+          ...this.selectedPlayers.map((player) => player.id),
+        ];
       } else {
+        // Select a new party
         this.selectedParty = party;
         const newPlayers = party.players.filter(
           (player) =>
@@ -289,13 +307,19 @@ export default {
               (selectedPlayer) => selectedPlayer.id === player.id
             )
         );
+        // Replace selectedPlayers with a new array
         this.selectedPlayers = [...this.selectedPlayers, ...newPlayers];
         this.encounter.party_id = party.id;
-        this.encounter.player_ids = this.selectedPlayers.map(
-          (player) => player.id
-        );
+        this.encounter.player_ids = [
+          ...this.selectedPlayers.map((player) => player.id),
+        ];
       }
+      // console.log(
+      //   "Selected Players after party selection:",
+      //   this.selectedPlayers
+      // );
     },
+
     togglePlayer(player) {
       if (this.selectedPlayers.some((p) => p.id === player.id)) {
         this.selectedPlayers = this.selectedPlayers.filter(
@@ -317,7 +341,7 @@ export default {
         this.encounter.monsters.push({
           id: this.selectedMonster.id,
           name: this.selectedMonster.name,
-          challengeRating: this.selectedMonster.challengeRating,
+          exp: this.selectedMonster.exp,
           alias: "",
         });
         this.selectedMonster = null;
