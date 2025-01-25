@@ -341,9 +341,8 @@ export default {
       this.combatants.forEach((combatant) => {
         if (combatant.type === "monster") {
           const dexMod = Math.floor(((combatant.dex || 10) - 10) / 2);
-          console.log(dexMod,combatant.dex)
+          console.log(dexMod, combatant.dex);
           combatant.initiative = Math.floor(Math.random() * 20) + 1 + dexMod;
-
         }
       });
       this.combatants.sort((a, b) => b.initiative - a.initiative);
@@ -415,17 +414,25 @@ export default {
       this.damageAmount = 0;
       this.initiativesSet = false;
     },
-    updateInitiative(index, initiative) {
-      this.combatants[index].initiative = initiative;
+    updateInitiative(index, newInitiative) {
+      const combatant = this.combatants[index];
+      console.log(combatant.initiative, newInitiative);
+      // if (combatant.initiative === newInitiative) return; // Skip if no change
 
+      // Update initiative for the combatant
+      combatant.initiative = newInitiative;
+
+      // Preserve the current active combatant's ID
       const activeCombatantId = this.combatants[this.currentTurnIndex]?.id;
 
-      this.combatants.sort((a, b) => b.initiative - a.initiative);
-
+      // Sort the combatants array by initiative
+      this.combatants = [...this.combatants].sort(
+        (a, b) => b.initiative - a.initiative
+      );
+      // Update the currentTurnIndex to match the active combatant's new position
       const newIndex = this.combatants.findIndex(
         (combatant) => combatant.id === activeCombatantId
       );
-
       this.currentTurnIndex = newIndex !== -1 ? newIndex : 0;
     },
   },
