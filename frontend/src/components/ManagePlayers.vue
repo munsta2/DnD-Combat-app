@@ -182,7 +182,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .manage-players {
   display: flex;
   flex-direction: column;
