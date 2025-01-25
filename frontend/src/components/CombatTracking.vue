@@ -340,8 +340,10 @@ export default {
     rollMonsterInitiatives() {
       this.combatants.forEach((combatant) => {
         if (combatant.type === "monster") {
-          const dexMod = Math.floor((combatant.dex || 10 - 10) / 2);
+          const dexMod = Math.floor(((combatant.dex || 10) - 10) / 2);
+          console.log(dexMod,combatant.dex)
           combatant.initiative = Math.floor(Math.random() * 20) + 1 + dexMod;
+
         }
       });
       this.combatants.sort((a, b) => b.initiative - a.initiative);
@@ -373,7 +375,7 @@ export default {
           hp: this.selectedMonster.hp,
           maxHp: this.selectedMonster.hp,
           ac: this.selectedMonster.ac,
-          dex: this.selectedMonster.dex || 10,
+          dex: this.selectedMonster.stats.dex,
           initiative: 0,
           displayName: `${this.selectedMonster.name} ${this.monsterCounter}`, // Assign new suffix
         };
