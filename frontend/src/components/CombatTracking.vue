@@ -86,6 +86,25 @@
 
       <!-- Combatants Section -->
       <div class="combatants-section section">
+        <h3>Apply Damage</h3>
+        <label for="combatant-select">Select Combatant:</label>
+        <select id="combatant-select" v-model="selectedCombatant">
+          <option
+            v-for="combatant in combatants"
+            :key="combatant.id"
+            :value="combatant.id"
+          >
+            {{ combatant.displayName }}
+          </option>
+        </select>
+        <label for="damage-input">Damage:</label>
+        <input
+          id="damage-input"
+          v-model.number="damageAmount"
+          type="number"
+          placeholder="Enter damage"
+        />
+        <button @click="applyDamage">Apply</button>
         <h3>Combatants</h3>
         <ul class="styled-list">
           <li
@@ -116,27 +135,7 @@
       </div>
 
       <!-- Apply Damage Section -->
-      <div class="apply-damage section">
-        <h3>Apply Damage</h3>
-        <label for="combatant-select">Select Combatant:</label>
-        <select id="combatant-select" v-model="selectedCombatant">
-          <option
-            v-for="combatant in combatants"
-            :key="combatant.id"
-            :value="combatant.id"
-          >
-            {{ combatant.displayName }}
-          </option>
-        </select>
-        <label for="damage-input">Damage:</label>
-        <input
-          id="damage-input"
-          v-model.number="damageAmount"
-          type="number"
-          placeholder="Enter damage"
-        />
-        <button @click="applyDamage">Apply</button>
-      </div>
+      <!-- <div class="apply-damage section"></div> -->
 
       <!-- Stat Block Section -->
       <div class="stat-block section" v-if="activeCombatant && statBlock">
