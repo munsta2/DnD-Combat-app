@@ -95,6 +95,7 @@
               { active: index === currentTurnIndex },
               { dead: combatant.hp === 0 },
             ]"
+            @click="selectCombatant(combatant.id)"
           >
             <input
               type="text"
@@ -361,6 +362,9 @@ export default {
           combatant.alias = combatant.name; // Keep players' names unchanged
         }
       });
+    },
+    selectCombatant(combatantId) {
+      this.selectedCombatant = combatantId;
     },
     addMonster() {
       if (this.selectedMonster) {
