@@ -397,6 +397,7 @@ export default {
       console.log("this is who I am doing damage to,", combatant.name);
       if (combatant) {
         combatant.hp = Math.max(0, combatant.hp - this.damageAmount);
+        this.damageAmount = null;
       }
     },
     nextTurn() {
