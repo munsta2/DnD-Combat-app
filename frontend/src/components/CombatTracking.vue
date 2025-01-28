@@ -113,6 +113,7 @@
             :class="[
               { active: index === currentTurnIndex },
               { dead: combatant.hp === 0 },
+              { damaged: combatant.isDamaged },
             ]"
             @click="selectCombatant(combatant.id)"
           >
@@ -401,6 +402,12 @@ export default {
       if (combatant) {
         combatant.hp = Math.max(0, combatant.hp - this.damageAmount);
         this.damageAmount = null;
+        combatant.isDamaged = true;
+        setTimeout(() => {
+          combatant.isDamaged = false;
+        }, 2000);
+
+        this.damageAmount = null;
       }
     },
     nextTurn() {
@@ -480,7 +487,10 @@ export default {
   width: 100%;
   gap: 20px;
 }
-
+.styled-list li.damaged {
+  background-color: rgba(255, 165, 0, 0.7); /* Orange background */
+  transition: background-color 2s ease-out; /* Smooth transition back to normal */
+}
 .section {
   background-color: rgba(0, 0, 0, 0.8);
   padding: 20px;
