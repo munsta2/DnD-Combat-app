@@ -49,6 +49,9 @@
         </button>
         <button @click="nextTurn">Next Turn</button>
         <button @click="endCombat" class="end-combat">End Combat</button>
+        <button @click="openMonsterStatblocks" class="view-statblocks">
+          View Monster Statblocks
+        </button>
       </div>
 
       <!-- Dice Roll Section -->
@@ -252,21 +255,26 @@ export default {
       return modifier > 0 ? `+${modifier}` : modifier.toString();
     },
     fetchStatBlock(combatant) {
-      console.log("I am being called");
       if (combatant.type === "monster") {
         fetch(`${process.env.VUE_APP_API_URL}/api/monsters/${combatant.dbId}`)
           .then((response) => response.json())
           .then((data) => {
-            this.statBlock = data;
-            console.log(data);
+            combatant.statBlock = data; // Attach statBlock directly to the combatant
+
+            // If the combatant is the currently active one, update the global statBlock
+            if (
+              this.activeCombatant &&
+              this.activeCombatant.id === combatant.id
+            ) {
+              this.statBlock = data;
+            }
           })
           .catch((error) => {
             console.error("Error fetching stat block:", error);
           });
-      } else {
-        this.statBlock = null; // Clear stat block for non-monster combatants
       }
     },
+
     fetchEncounters() {
       fetch(`${process.env.VUE_APP_API_URL}/api/encounters`)
         .then((response) => response.json())
@@ -310,25 +318,23 @@ export default {
 
           // Assign displayName and count existing monsters
           this.combatants = data.turn_order.map((combatant, index) => {
+            const updatedCombatant = {
+              ...combatant,
+              id: `${combatant.id}-${index}`, // Unique frontend ID
+              dbId: combatant.id, // Set dbId to the monster's database id
+              displayName:
+                combatant.type === "monster"
+                  ? `${combatant.name} ${++monsterCount}`
+                  : combatant.name,
+              initiative: combatant.initiative || 0,
+            };
+
+            // Fetch and attach statBlock for monsters
             if (combatant.type === "monster") {
-              monsterCount += 1; // Increment monster count
-              console.log(combatant);
-              return {
-                ...combatant,
-                id: `${combatant.id}-${index}`, // Unique frontend ID
-                dbId: combatant.id, // Set dbId to the monster's database id
-                displayName: `${combatant.name} ${monsterCount}`,
-                initiative: combatant.initiative || 0,
-              };
-            } else {
-              // Players keep their original name
-              return {
-                ...combatant,
-                id: `player-${index}`,
-                displayName: combatant.name,
-                initiative: 0,
-              };
+              this.fetchStatBlock(updatedCombatant);
             }
+
+            return updatedCombatant;
           });
 
           this.monsterCounter = monsterCount; // Set monster counter for future additions
@@ -338,6 +344,7 @@ export default {
           console.error("Error loading encounter:", error);
         });
     },
+
     rollMonsterInitiatives() {
       this.combatants.forEach((combatant) => {
         if (combatant.type === "monster") {
@@ -382,6 +389,7 @@ export default {
           initiative: 0,
           displayName: `${this.selectedMonster.name} ${this.monsterCounter}`, // Assign new suffix
         };
+        this.fetchStatBlock(newMonster);
         this.combatants.push(newMonster); // Add the new monster
       }
     },
@@ -425,6 +433,28 @@ export default {
       this.damageAmount = 0;
       this.initiativesSet = false;
     },
+    openMonsterStatblocks() {
+      const uniqueMonsterIds = [
+        ...new Set(
+          this.combatants.filter((c) => c.type === "monster").map((c) => c.dbId)
+        ),
+      ];
+
+      const monsterStatblocks = uniqueMonsterIds
+        .map((id) => {
+          const combatant = this.combatants.find((c) => c.dbId === id);
+          return combatant?.statBlock || null;
+        })
+        .filter(Boolean);
+
+      console.log("Monster statblocks:", monsterStatblocks); // Log to debug
+
+      localStorage.setItem(
+        "monsterStatblocks",
+        JSON.stringify(monsterStatblocks)
+      );
+      window.open("/statblock", "_blank");
+    },
     updateInitiative(index, newInitiative) {
       const combatant = this.combatants[index];
       console.log(combatant.initiative, newInitiative);
@@ -451,7 +481,12 @@ export default {
     activeCombatant: {
       handler(newValue) {
         if (newValue && newValue.type === "monster") {
-          this.fetchStatBlock(newValue);
+          // Check if the stat block is already fetched
+          if (newValue.statBlock) {
+            this.statBlock = newValue.statBlock; // Use cached statBlock
+          } else {
+            this.fetchStatBlock(newValue); // Fetch it if not already cached
+          }
         } else {
           this.statBlock = null; // Clear the stat block for non-monster turns
         }
