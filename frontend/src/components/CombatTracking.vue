@@ -117,6 +117,7 @@
               { active: index === currentTurnIndex },
               { dead: combatant.hp === 0 },
               { damaged: combatant.isDamaged },
+              { selected: combatant.isSelected },
             ]"
             @click="selectCombatant(combatant.id)"
           >
@@ -371,7 +372,16 @@ export default {
       });
     },
     selectCombatant(combatantId) {
+      this.combatants.forEach((c) => (c.isSelected = false));
+
+      // Set the selected combatant
       this.selectedCombatant = combatantId;
+
+      // Find the selected combatant and apply the effect
+      const combatant = this.combatants.find((c) => c.id === combatantId);
+      if (combatant) {
+        combatant.isSelected = true;
+      }
     },
     addMonster() {
       if (this.selectedMonster) {
@@ -403,19 +413,26 @@ export default {
         alert("Please select a combatant and enter damage.");
         return;
       }
+
       const combatant = this.combatants.find(
         (c) => c.id === this.selectedCombatant
       );
-      console.log("this is who I am doing damage to,", combatant.name);
       if (combatant) {
         combatant.hp = Math.max(0, combatant.hp - this.damageAmount);
         this.damageAmount = null;
+
+        // Temporarily remove the selection effect
+        const wasSelected = combatant.isSelected;
+        combatant.isSelected = false;
+
+        // Apply damage effect
         combatant.isDamaged = true;
+
+        // After the damage animation ends, reapply selection if it was selected
         setTimeout(() => {
           combatant.isDamaged = false;
-        }, 2000);
-
-        this.damageAmount = null;
+          if (wasSelected) combatant.isSelected = true;
+        }, 1500); // Matches the duration of the damage animation
       }
     },
     nextTurn() {
@@ -522,10 +539,7 @@ export default {
   width: 100%;
   gap: 20px;
 }
-.styled-list li.damaged {
-  background-color: rgba(255, 165, 0, 0.7); /* Orange background */
-  transition: background-color 2s ease-out; /* Smooth transition back to normal */
-}
+
 .section {
   background-color: rgba(0, 0, 0, 0.8);
   padding: 20px;
@@ -694,5 +708,25 @@ export default {
 
 .styled-list li.dead input {
   text-decoration: line-through; /* Strike through input text if you want */
+}
+.styled-list li.damaged {
+  background-color: rgba(255, 165, 0, 0.7); /* Orange background */
+  transition: background-color 2s ease-out; /* Smooth transition back to normal */
+}
+.styled-list li.selected {
+  background-color: rgba(0, 255, 0, 0.4); /* Green highlight */
+  transition: background-color 1.5s ease-in-out; /* Smooth transition */
+}
+
+@keyframes slowPulseGreen {
+  0% {
+    background-color: rgba(0, 255, 0, 0.3);
+  }
+  50% {
+    background-color: rgba(0, 255, 0, 0.1);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 </style>
