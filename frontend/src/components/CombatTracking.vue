@@ -49,6 +49,9 @@
         </button>
         <button @click="nextTurn">Next Turn</button>
         <button @click="endCombat" class="end-combat">End Combat</button>
+        <button @click="openMonsterStatblocks" class="view-statblocks">
+          View Monster Statblocks
+        </button>
       </div>
 
       <!-- Dice Roll Section -->
@@ -86,6 +89,25 @@
 
       <!-- Combatants Section -->
       <div class="combatants-section section">
+        <h3>Apply Damage</h3>
+        <label for="combatant-select">Select Combatant:</label>
+        <select id="combatant-select" v-model="selectedCombatant">
+          <option
+            v-for="combatant in combatants"
+            :key="combatant.id"
+            :value="combatant.id"
+          >
+            {{ combatant.displayName }}
+          </option>
+        </select>
+        <label for="damage-input">Damage:</label>
+        <input
+          id="damage-input"
+          v-model.number="damageAmount"
+          type="number"
+          placeholder="Enter damage"
+        />
+        <button @click="applyDamage">Apply</button>
         <h3>Combatants</h3>
         <ul class="styled-list">
           <li
@@ -94,7 +116,10 @@
             :class="[
               { active: index === currentTurnIndex },
               { dead: combatant.hp === 0 },
+              { damaged: combatant.isDamaged },
+              { selected: combatant.isSelected },
             ]"
+            @click="selectCombatant(combatant.id)"
           >
             <input
               type="text"
@@ -115,27 +140,7 @@
       </div>
 
       <!-- Apply Damage Section -->
-      <div class="apply-damage section">
-        <h3>Apply Damage</h3>
-        <label for="combatant-select">Select Combatant:</label>
-        <select id="combatant-select" v-model="selectedCombatant">
-          <option
-            v-for="combatant in combatants"
-            :key="combatant.id"
-            :value="combatant.id"
-          >
-            {{ combatant.displayName }}
-          </option>
-        </select>
-        <label for="damage-input">Damage:</label>
-        <input
-          id="damage-input"
-          v-model.number="damageAmount"
-          type="number"
-          placeholder="Enter damage"
-        />
-        <button @click="applyDamage">Apply</button>
-      </div>
+      <!-- <div class="apply-damage section"></div> -->
 
       <!-- Stat Block Section -->
       <div class="stat-block section" v-if="activeCombatant && statBlock">
@@ -251,21 +256,26 @@ export default {
       return modifier > 0 ? `+${modifier}` : modifier.toString();
     },
     fetchStatBlock(combatant) {
-      console.log("I am being called");
       if (combatant.type === "monster") {
         fetch(`${process.env.VUE_APP_API_URL}/api/monsters/${combatant.dbId}`)
           .then((response) => response.json())
           .then((data) => {
-            this.statBlock = data;
-            console.log(data);
+            combatant.statBlock = data; // Attach statBlock directly to the combatant
+
+            // If the combatant is the currently active one, update the global statBlock
+            if (
+              this.activeCombatant &&
+              this.activeCombatant.id === combatant.id
+            ) {
+              this.statBlock = data;
+            }
           })
           .catch((error) => {
             console.error("Error fetching stat block:", error);
           });
-      } else {
-        this.statBlock = null; // Clear stat block for non-monster combatants
       }
     },
+
     fetchEncounters() {
       fetch(`${process.env.VUE_APP_API_URL}/api/encounters`)
         .then((response) => response.json())
@@ -309,25 +319,23 @@ export default {
 
           // Assign displayName and count existing monsters
           this.combatants = data.turn_order.map((combatant, index) => {
+            const updatedCombatant = {
+              ...combatant,
+              id: `${combatant.id}-${index}`, // Unique frontend ID
+              dbId: combatant.id, // Set dbId to the monster's database id
+              displayName:
+                combatant.type === "monster"
+                  ? `${combatant.name} ${++monsterCount}`
+                  : combatant.name,
+              initiative: combatant.initiative || 0,
+            };
+
+            // Fetch and attach statBlock for monsters
             if (combatant.type === "monster") {
-              monsterCount += 1; // Increment monster count
-              console.log(combatant);
-              return {
-                ...combatant,
-                id: `${combatant.id}-${index}`, // Unique frontend ID
-                dbId: combatant.id, // Set dbId to the monster's database id
-                displayName: `${combatant.name} ${monsterCount}`,
-                initiative: combatant.initiative || 0,
-              };
-            } else {
-              // Players keep their original name
-              return {
-                ...combatant,
-                id: `player-${index}`,
-                displayName: combatant.name,
-                initiative: 0,
-              };
+              this.fetchStatBlock(updatedCombatant);
             }
+
+            return updatedCombatant;
           });
 
           this.monsterCounter = monsterCount; // Set monster counter for future additions
@@ -337,13 +345,13 @@ export default {
           console.error("Error loading encounter:", error);
         });
     },
+
     rollMonsterInitiatives() {
       this.combatants.forEach((combatant) => {
         if (combatant.type === "monster") {
           const dexMod = Math.floor(((combatant.dex || 10) - 10) / 2);
-          console.log(dexMod,combatant.dex)
+          console.log(dexMod, combatant.dex);
           combatant.initiative = Math.floor(Math.random() * 20) + 1 + dexMod;
-
         }
       });
       this.combatants.sort((a, b) => b.initiative - a.initiative);
@@ -363,6 +371,18 @@ export default {
         }
       });
     },
+    selectCombatant(combatantId) {
+      this.combatants.forEach((c) => (c.isSelected = false));
+
+      // Set the selected combatant
+      this.selectedCombatant = combatantId;
+
+      // Find the selected combatant and apply the effect
+      const combatant = this.combatants.find((c) => c.id === combatantId);
+      if (combatant) {
+        combatant.isSelected = true;
+      }
+    },
     addMonster() {
       if (this.selectedMonster) {
         this.monsterCounter += 1; // Increment the monster counter
@@ -379,6 +399,7 @@ export default {
           initiative: 0,
           displayName: `${this.selectedMonster.name} ${this.monsterCounter}`, // Assign new suffix
         };
+        this.fetchStatBlock(newMonster);
         this.combatants.push(newMonster); // Add the new monster
       }
     },
@@ -392,12 +413,26 @@ export default {
         alert("Please select a combatant and enter damage.");
         return;
       }
+
       const combatant = this.combatants.find(
         (c) => c.id === this.selectedCombatant
       );
-      console.log("this is who I am doing damage to,", combatant.name);
       if (combatant) {
         combatant.hp = Math.max(0, combatant.hp - this.damageAmount);
+        this.damageAmount = null;
+
+        // Temporarily remove the selection effect
+        const wasSelected = combatant.isSelected;
+        combatant.isSelected = false;
+
+        // Apply damage effect
+        combatant.isDamaged = true;
+
+        // After the damage animation ends, reapply selection if it was selected
+        setTimeout(() => {
+          combatant.isDamaged = false;
+          if (wasSelected) combatant.isSelected = true;
+        }, 1500); // Matches the duration of the damage animation
       }
     },
     nextTurn() {
@@ -415,17 +450,47 @@ export default {
       this.damageAmount = 0;
       this.initiativesSet = false;
     },
-    updateInitiative(index, initiative) {
-      this.combatants[index].initiative = initiative;
+    openMonsterStatblocks() {
+      const uniqueMonsterIds = [
+        ...new Set(
+          this.combatants.filter((c) => c.type === "monster").map((c) => c.dbId)
+        ),
+      ];
 
+      const monsterStatblocks = uniqueMonsterIds
+        .map((id) => {
+          const combatant = this.combatants.find((c) => c.dbId === id);
+          return combatant?.statBlock || null;
+        })
+        .filter(Boolean);
+
+      console.log("Monster statblocks:", monsterStatblocks); // Log to debug
+
+      localStorage.setItem(
+        "monsterStatblocks",
+        JSON.stringify(monsterStatblocks)
+      );
+      window.open("/statblock", "_blank");
+    },
+    updateInitiative(index, newInitiative) {
+      const combatant = this.combatants[index];
+      console.log(combatant.initiative, newInitiative);
+      // if (combatant.initiative === newInitiative) return; // Skip if no change
+
+      // Update initiative for the combatant
+      combatant.initiative = newInitiative;
+
+      // Preserve the current active combatant's ID
       const activeCombatantId = this.combatants[this.currentTurnIndex]?.id;
 
-      this.combatants.sort((a, b) => b.initiative - a.initiative);
-
+      // Sort the combatants array by initiative
+      this.combatants = [...this.combatants].sort(
+        (a, b) => b.initiative - a.initiative
+      );
+      // Update the currentTurnIndex to match the active combatant's new position
       const newIndex = this.combatants.findIndex(
         (combatant) => combatant.id === activeCombatantId
       );
-
       this.currentTurnIndex = newIndex !== -1 ? newIndex : 0;
     },
   },
@@ -433,7 +498,12 @@ export default {
     activeCombatant: {
       handler(newValue) {
         if (newValue && newValue.type === "monster") {
-          this.fetchStatBlock(newValue);
+          // Check if the stat block is already fetched
+          if (newValue.statBlock) {
+            this.statBlock = newValue.statBlock; // Use cached statBlock
+          } else {
+            this.fetchStatBlock(newValue); // Fetch it if not already cached
+          }
         } else {
           this.statBlock = null; // Clear the stat block for non-monster turns
         }
@@ -638,5 +708,25 @@ export default {
 
 .styled-list li.dead input {
   text-decoration: line-through; /* Strike through input text if you want */
+}
+.styled-list li.damaged {
+  background-color: rgba(255, 165, 0, 0.7); /* Orange background */
+  transition: background-color 2s ease-out; /* Smooth transition back to normal */
+}
+.styled-list li.selected {
+  background-color: rgba(0, 255, 0, 0.4); /* Green highlight */
+  transition: background-color 1.5s ease-in-out; /* Smooth transition */
+}
+
+@keyframes slowPulseGreen {
+  0% {
+    background-color: rgba(0, 255, 0, 0.3);
+  }
+  50% {
+    background-color: rgba(0, 255, 0, 0.1);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 </style>
