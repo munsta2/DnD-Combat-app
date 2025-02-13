@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Blight-Touched Monastic",
+    "source": "Homebrew",
+    "size": "Medium",
+    "type": "undead",
+    "subtype": "",
+    "alignment": "neutral evil",
+    "ac": 13,
+    "hp": 45,
+    "hit_dice": "6d8 + 18",
+    "speed": "40 ft.",
+    "stats": {
+      "str": 14,
+      "dex": 15,
+      "con": 16,
+      "int": 8,
+      "wis": 12,
+      "cha": 10
+    },
+    "damageVulnerabilities": "",
+    "damageResistances": "necrotic, poison",
+    "damageImmunities": "",
+    "conditionImmunities": "charmed, frightened, poisoned",
+    "senses": "darkvision 60 ft., passive Perception 11",
+    "languages": "Common, corrupted whispers",
+    "cr": 2,
+    "exp":450,
+    "traits": "<p><em><strong>Corrupted Fist:</strong></em> Unarmed strikes deal an additional 3 (1d6) necrotic damage.</p> <p><em><strong>Blighted Aura:</strong></em> Creatures within 10 feet take 5 (1d10) necrotic damage at the start of their turn unless they succeed on a DC 12 Constitution saving throw.</p>",
+    "actions": "<p><em><strong>Multiattack:</strong></em> The monastic makes two unarmed strike attacks.</p> <p><em><strong>Unarmed Strike:</strong></em> Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 6 (1d8 + 2) bludgeoning damage plus 3 (1d6) necrotic damage.</p> <p><em><strong>Flurry of Corruption (Recharge 5-6):</strong></em> Each creature within 5 feet must succeed on a DC 12 Dexterity saving throw or take 9 (2d8) necrotic damage.</p>",
+    "legendaryActions": "",
+    "reactions": ""
+  },
+  {
+    "name": "Blight Cultist Scout",
+    "source": "Homebrew",
+    "size": "Medium",
+    "type": "humanoid",
+    "subtype": "cultist",
+    "alignment": "neutral evil",
+    "ac": 12,
+    "hp": 22,
+    "hit_dice": "4d8 + 4",
+    "speed": "30 ft.",
+    "stats": {
+      "str": 10,
+      "dex": 14,
+      "con": 12,
+      "int": 11,
+      "wis": 13,
+      "cha": 12
+    },
+    "damageVulnerabilities": "",
+    "damageResistances": "necrotic",
+    "damageImmunities": "",
+    "conditionImmunities": "",
+    "senses": "passive Perception 11",
+    "languages": "Common, Sylvan",
+    "cr": "1/2",
+    "exp":100,
+    "traits": "<p><em><strong>Guerrilla Tactics:</strong></em> The scout has advantage on attack rolls against creatures that haven’t acted yet in combat.</p> <p><em><strong>Blight Infusion:</strong></em> Weapon attacks deal an additional 3 (1d6) necrotic damage.</p>",
+    "actions": "<p><em><strong>Multiattack:</strong></em> The scout makes two melee or ranged attacks.</p> <p><em><strong>Scimitar:</strong></em> Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 6 (1d6 + 2) slashing damage plus 3 (1d6) necrotic damage.</p> <p><em><strong>Shortbow:</strong></em> Ranged Weapon Attack: +4 to hit, range 80/320 ft., one target. Hit: 6 (1d6 + 2) piercing damage plus 3 (1d6) necrotic damage.</p> <p><em><strong>Blighted Net (Recharge 5-6):</strong></em> Ranged Weapon Attack: +4 to hit, range 20/60 ft., one target. On a hit, the target is restrained and takes 3 (1d6) necrotic damage at the start of its turn. The net can be destroyed (AC 10, 10 HP).</p>",
+    "legendaryActions": "",
+    "reactions": ""
+  },
+  {
+    "name": "Blightcaller's Envoy",
+    "source": "Homebrew",
+    "size": "Medium",
+    "type": "humanoid",
+    "subtype": "druid",
+    "alignment": "neutral evil",
+    "ac": 15,
+    "hp": 75,
+    "hit_dice": "10d8 + 30",
+    "speed": "30 ft.",
+    "stats": {
+      "str": 12,
+      "dex": 14,
+      "con": 16,
+      "int": 12,
+      "wis": 18,
+      "cha": 13
+    },
+    "damageVulnerabilities": "",
+    "damageResistances": "necrotic, poison",
+    "damageImmunities": "",
+    "conditionImmunities": "charmed, frightened",
+    "senses": "darkvision 60 ft., passive Perception 17",
+    "languages": "Common, Druidic, Sylvan",
+    "cr": 5,
+    "exp":1800,
+    "traits": "<p><em><strong>Blighted Spellcasting:</strong></em> The envoy is a 7th-level spellcaster. Spellcasting ability is Wisdom (save DC 15, +7 to hit with spell attacks). Prepared spells include: <br>Cantrips (Druidcraft, Infestation, Thorn Whip); <br>1st level (Entangle, Thunderwave); <br>2nd level (Spike Growth, Lesser Restoration); <br>3rd level (Blight, Call Lightning); 4th level (Ice Storm).</p> <p><em><strong>Corrupted Nature:</strong></em> Advantage on saving throws against magical effects from beasts or plants.</p> <p><em><strong>Necrotic Pulse (Recharge 5-6):</strong></em> Releases necrotic energy. All creatures within 10 feet must succeed on a DC 15 Constitution saving throw or take 10 (3d6) necrotic damage.</p>",
+    "actions": "<p><em><strong>Corrupted Quarterstaff:</strong></em> Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 9 (1d10 + 4) bludgeoning damage plus 7 (2d6) necrotic damage.</p> <p><em><strong>Summon Blighted Minions (1/Day):</strong></em> Summons two Blight-Touched Wolves or one Blight-Touched Monastic within 30 feet. Minions act immediately after the envoy.</p>",
+    "legendaryActions": "",
+    "reactions": ""
+  }
+  
+  
+  
+  ]
+  
