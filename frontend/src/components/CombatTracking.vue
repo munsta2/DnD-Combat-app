@@ -69,7 +69,7 @@
         </div>
         <div class="dice-buttons">
           <button
-            v-for="sides in [4, 6, 8, 10, 12]"
+            v-for="sides in [4, 6, 8, 10, 12, 20]"
             :key="sides"
             @click="rollDice(sides)"
           >
