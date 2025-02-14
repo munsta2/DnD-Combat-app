@@ -1,9 +1,7 @@
 import json
 import requests
-
-# Replace with your actual PythonAnywhere API URL
-API_URL = "https://trogdor22.pythonanywhere.com/api/monsters"
-
+import os
+from dotenv import load_dotenv
 def push_monsters_to_database(json_file):
     """
     Reads a JSON file containing monster data and sends it to the database.
@@ -35,9 +33,17 @@ def push_monsters_to_database(json_file):
         print("Error: Invalid JSON file format.")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+# Load environment variables from .env file
+load_dotenv()
+# Replace with your actual PythonAnywhere API URL
+API_URL = os.getenv("API_URL")
+if not API_URL:
+    raise ValueError("API_URL environment variable is not set.")
+print("Using API URL:", API_URL)
+
 
 # Path to your JSON file
 json_file_path = "monster.json"
-
+print(API_URL)
 # Push monsters to the database
 push_monsters_to_database(json_file_path)
