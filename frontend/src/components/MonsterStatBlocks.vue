@@ -130,21 +130,33 @@ export default {
   color: #2c2c2c;
 }
 
+/* Updated layout to allow multiple statblocks to align side-by-side */
 .statblock-list {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
-  align-items: center;
+  flex-wrap: wrap; /* Allows wrapping onto new lines */
+  justify-content: center; /* Centers items when fewer than max per row */
+  gap: 20px; /* Adds spacing between items */
 }
 
+/* Ensures statblocks fit within the grid */
 .stat-block {
-  width: 90%;
-  max-width: 600px;
+  width: calc(
+    50% - 20px
+  ); /* Each statblock takes 50% of the row minus spacing */
+  max-width: 500px; /* Prevents them from becoming too wide */
+  min-width: 300px; /* Prevents them from becoming too small */
   padding: 15px;
   border: 2px solid #7a4214;
   border-radius: 10px;
   background-color: #fdf6e3;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Adjust to full width on smaller screens */
+@media (max-width: 700px) {
+  .stat-block {
+    width: 100%; /* Stack full-width on smaller screens */
+  }
 }
 
 .stat-block h3 {
