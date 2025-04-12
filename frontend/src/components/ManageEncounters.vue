@@ -229,6 +229,8 @@ export default {
         1: { easy: 25, medium: 50, hard: 75, deadly: 100 },
         2: { easy: 50, medium: 100, hard: 150, deadly: 200 },
         3: { easy: 75, medium: 150, hard: 225, deadly: 400 },
+        4: { easy: 125, medium: 250, hard: 375, deadly: 500 },
+        5: { easy: 250, medium: 500, hard: 750, deadly: 1100 },
       };
 
       let partyThresholds = { easy: 0, medium: 0, hard: 0, deadly: 0 };
